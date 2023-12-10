@@ -32,7 +32,8 @@ class GPT(object):
 
     def send(self, msg):
         data = '"prompt":"{}","options":{},"systemMessage":"{}","temperature":{:3},"top_p":{:3}'.format(
-            msg, '{%s}' % f'"parentMessageID": "{self.pmid}"' if self.pmid else '{}', systemMessage, self.temperature, self.top_p
+            msg, '{%s}' % f'"parentMessageID": "{self.pmid}"' if self.pmid else '{}', systemMessage, self.temperature,
+            self.top_p
         )
         data = '{%s}' % data
         response = requests.request(
@@ -44,6 +45,9 @@ class GPT(object):
         json_response = json.loads(response.text.split('&KFw6loC9Qvy&')[-1])
         self.pmid = json_response['id']
         return json_response['text']
+
+    def attach(self, chat):
+        chat.gpt = self
 
 
 def main():
