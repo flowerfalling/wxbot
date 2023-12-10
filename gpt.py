@@ -11,9 +11,9 @@ systemMessage = "You are ChatGPT, a large language model trained by OpenAI. Foll
 
 
 class GPT(object):
-    def __init__(self):
-        self.url = 'http://w5.xjai.cc/api/chat-process'
-        self.headers = {
+    def __init__(self) -> None:
+        self.__url: str = 'http://w5.xjai.cc/api/chat-process'
+        self.__headers: dict = {
             'Host': 'w5.xjai.cc',
             'Proxy-Connection': 'keep-alive',
             'Pragma': 'no-cache',
@@ -26,28 +26,21 @@ class GPT(object):
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,zh;q=0.9',
         }
-        self.temperature = 0.8
-        self.top_p = 1.0
-        self.pmid = ''
+        self.__temperature: float = 0.8
+        self.__top_p: float = 1.0
+        self.__pmid: str = ''
 
-    def send(self, msg):
+    def __call__(self, msg: str) -> str:
         data = '"prompt":"{}","options":{},"systemMessage":"{}","temperature":{:3},"top_p":{:3}'.format(
-            msg, '{%s}' % f'"parentMessageID": "{self.pmid}"' if self.pmid else '{}', systemMessage, self.temperature,
-            self.top_p
+            msg, '{%s}' % f'"parentMessageID": "{self.__pmid}"' if self.__pmid else '{}', systemMessage,
+            self.__temperature, self.__top_p
         )
         data = '{%s}' % data
-        response = requests.request(
-            method='post',
-            url=self.url,
-            headers=self.headers,
-            data=data + '  ' * 30
-        )
-        json_response = json.loads(response.text.split('&KFw6loC9Qvy&')[-1])
-        self.pmid = json_response['id']
-        return json_response['text']
-
-    def attach(self, chat):
-        chat.gpt = self
+        response = json.loads(requests.request(
+            method='post', url=self.__url, headers=self.__headers, data=data + '  ' * 30
+        ).text.split('&KFw6loC9Qvy&')[-1])
+        self.__pmid = response['id']
+        return response['text']
 
 
 def main():
@@ -56,7 +49,7 @@ def main():
         prompt = input()
         if prompt == 'quit':
             break
-        resp = gpt.send(prompt)
+        resp = gpt(prompt)
         print(resp)
 
 
