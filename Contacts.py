@@ -11,7 +11,7 @@ class Contacts(object):
     def __init__(self, wcf: Wcf) -> None:
         self.contacts = [Chat(i, wcf) for i in wcf.get_friends()]
         self.contacts.append(Chat(wcf.get_info_by_wxid(wcf.get_self_wxid()), wcf))
-        self.contacts[-1].remark = 'Me'
+        self.contacts[-1].remark = "Me"
 
     def search_with_wxid(self, wxid: str) -> Chat:
         for i in self.contacts:
@@ -31,5 +31,5 @@ def main():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

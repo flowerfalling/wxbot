@@ -23,12 +23,14 @@ class Chat(object):
     def __init__(self, info: dict, wcf: wcferry.Wcf) -> None:
         self.wcf = wcf
         self.__dict__.update(info)
-        
+
     def gpt_reply(self, msg: wcferry.WxMsg) -> str:
         if msg.from_group():
-            self.wcf.send_text(resp := f'GPT:{self.gpt(msg.content[1:])}@', msg.roomid, msg.sender)
+            self.wcf.send_text(
+                resp := f"GPT:{self.gpt(msg.content[1:])}@", msg.roomid, msg.sender
+            )
         else:
-            self.wcf.send_text(resp := f'GPT:{self.gpt(msg.content[1:])}', msg.sender)
+            self.wcf.send_text(resp := f"GPT:{self.gpt(msg.content[1:])}", msg.sender)
         return resp
 
 
@@ -36,5 +38,5 @@ def main():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

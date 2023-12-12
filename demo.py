@@ -10,7 +10,7 @@ from wcferry import Wcf
 
 from Process import Process
 
-users = ['\u3000\u3000', 'Yang', 'ablaze']
+users = ["\u3000\u3000", "Yang", "ablaze"]
 
 
 def main():
@@ -25,5 +25,5 @@ def main():
             continue
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
