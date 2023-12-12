@@ -20,7 +20,7 @@ def main():
         time.sleep(0.5)
         try:
             msg = wcf.get_msg()
-            process.process(msg)
+            process.__call__(msg)
         except queue.Empty:
             continue
 

@@ -5,7 +5,7 @@
 # @Software: PyCharm
 import wcferry
 
-from gpt import GPT
+from GPT import GPT
 
 
 class Chat(object):
