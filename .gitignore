@@ -4,3 +4,4 @@ __pycache__
 logs
 .wcf.lock
 demo
+config.yaml

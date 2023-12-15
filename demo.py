@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+# @Time    : 2023/12/15 9:47
+# @Author  : 之落花--falling_flowers
+# @File    : demo.py
+# @Software: PyCharm
+from wcferry import Wcf
+
+from GPT import GPT
+from suswx import Robot, Content, Configuration
+
+
+def main():
+    config = Configuration('./config.yaml')
+    wcf = Wcf(debug=True)
+    sus = Robot(wcf)
+    sus.register(GPT(wcf, config).private_reply, Content.TEXT, fromFriend=True)
+    sus.run()
+
+
+if __name__ == '__main__':
+    main()
