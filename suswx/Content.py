@@ -7,8 +7,8 @@ from enum import Enum
 
 
 class Content(Enum):
-    TEXT = 1
-    PICTURE = 3
-    AUDIO = 34
-    VIDEO = 47
-    FILE = 1090519089
+    TEXT: int = 1
+    PICTURE: int = 3
+    AUDIO: int = 34
+    VIDEO: int = 47
+    FILE: int = 1090519089

@@ -11,9 +11,9 @@ from suswx import Robot, Content, Configuration
 
 
 def main():
-    config = Configuration("./config.yaml")
-    wcf = Wcf(debug=True)
-    sus = Robot(wcf)
+    config: Configuration = Configuration("./config.yaml")
+    wcf: Wcf = Wcf(debug=True)
+    sus: Robot = Robot(wcf)
     sus.register(GPT(wcf, config).private_reply, Content.TEXT, fromFriend=True)
     sus.register_command(gpt(wcf, config))
     sus.run()

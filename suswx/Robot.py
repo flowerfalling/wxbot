@@ -7,13 +7,13 @@ import atexit
 import logging
 import queue
 import time
+from threading import Thread
 from typing import Callable
 
 import wcferry
 from wcferry import Wcf
 
 from suswx.Content import Content
-from threading import Thread
 
 logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -46,8 +46,8 @@ class Robot(object):
         from_group = int(msg.from_group())
         if not from_group and msg.is_text():
             self.logger.info(
-                "%s: %s",
-                ([{self.wcf.get_info_by_wxid(msg.sender)["name"]}], msg.content),
+                "[%s]: %s",
+                self.wcf.get_info_by_wxid(msg.sender)["name"], msg.content,
             )
         if msg.from_self():
             func = self.registry[0][0]
@@ -60,11 +60,11 @@ class Robot(object):
                 Thread(target=i, args=(msg,)).start()
 
     def register(
-        self,
-        func: Callable,
-        msgType: Content,
-        fromGroup: bool = False,
-        fromFriend: bool = False,
+            self,
+            func: Callable,
+            msgType: Content,
+            fromGroup: bool = False,
+            fromFriend: bool = False,
     ) -> None:
         if fromFriend:
             self.registry[msgType.value][0].append(func)

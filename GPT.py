@@ -4,6 +4,7 @@
 # @File    : GPT.py
 # @Software: PyCharm
 import json
+import time
 
 import requests
 import wcferry
@@ -12,9 +13,9 @@ from suswx import Configuration
 
 
 class GPT(object):
-    __URL = "http://w5.xjai.cc/api/chat-process"
-    __SYSTEM_MESSAGE = "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown."
-    __HEADERS = {
+    __URL: str = "http://w5.xjai.cc/api/chat-process"
+    __SYSTEM_MESSAGE: str = "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown."
+    __HEADERS: dict[str, str] = {
         "Host": "w5.xjai.cc",
         "Proxy-Connection": "keep-alive",
         "Pragma": "no-cache",
@@ -34,23 +35,29 @@ class GPT(object):
         self.__info: dict[str, GPT._GPTInfo] = {}
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:
-        sender = msg.sender
+        sender: str = msg.sender
         if sender not in self.__config["allow_list"] or not self.__config["enable"]:
             return
-        user = self.__info.setdefault(sender, GPT._GPTInfo())
-        content = msg.content
+        user: GPT._GPTInfo = self.__info.setdefault(sender, GPT._GPTInfo())
+        content: str = msg.content
         if content.startswith("/gpt"):
             self.__wcf.send_text(user.command(content.split(" ")[-1]), sender)
             return
         if user.state or content.startswith("/"):
-            if (response := self.__reply(content[int(not user.state) :], user)) is None:
-                return
-            user.pmid = response["id"]
-            self.__wcf.send_text("[GPT]%s" % response["text"], sender)
+            if user.waiting:
+                while user.waiting:
+                    time.sleep(0.5)
+            user.wait()
+            if response := self.__reply(content[int(not user.state):], user):
+                user.pmid = response["id"]
+                self.__wcf.send_text("[GPT]%s" % response["text"], sender)
+            else:
+                self.__wcf.send_text('Sorry, my answer timed out', sender)
+            user.wake()
 
     def __reply(self, msg: str, info: "GPT._GPTInfo") -> dict | None:
         try:
-            response = json.loads(
+            response: dict[str, str] = json.loads(
                 requests.post(
                     self.__URL,
                     headers=self.__HEADERS,
@@ -61,15 +68,15 @@ class GPT(object):
                         "temperature": info.temperature,
                         "top_p": info.top_p,
                     },
-                    timeout=5,
+                    timeout=10,
                 ).text.split("&KFw6loC9Qvy&")[-1]
             )
             return {"id": response["id"], "text": response["text"]}
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return None
 
     class _GPTInfo(object):
-        __GPT_HELP = """gpt command:
+        __GPT_HELP: str = """gpt command:
   /xxx 与gpt对话
   /gpt help 获取帮助
   /gpt start 开启gpt连续对话
@@ -77,10 +84,15 @@ class GPT(object):
   /gpt clear 清空当前会话"""
 
         def __init__(self) -> None:
+            self.__waiting: bool = False
             self.__state: bool = False
             self.__top_p: float = 1.0
             self.__temperature: float = 0.8
             self.pmid: str = ""
+
+        @property
+        def waiting(self) -> bool:
+            return self.__waiting
 
         @property
         def state(self) -> bool:
@@ -93,6 +105,12 @@ class GPT(object):
         @property
         def temperature(self) -> float:
             return self.__temperature
+
+        def wait(self) -> None:
+            self.__waiting = True
+
+        def wake(self) -> None:
+            self.__waiting = False
 
         @top_p.setter
         def top_p(self, value: float) -> None:

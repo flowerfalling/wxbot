@@ -1,7 +1,6 @@
 chatgpt:
-  allow_list:
+  allow_list:  # wxid(暂只支持私聊)
   - wxid_xxxx1
   - wxid_xxxx2
   - wxid_xxxx3
-  - wxid_xxxx4
   enable: true

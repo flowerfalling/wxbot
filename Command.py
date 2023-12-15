@@ -4,25 +4,26 @@
 # @File    : Command.py
 # @Software: PyCharm
 import re
+from typing import Callable
 
 import wcferry
 
 from suswx import Configuration
 
 
-def gpt(wcf: wcferry.Wcf, config: Configuration):
-    gpt_help = """gpt command[me]
+def gpt(wcf: wcferry.Wcf, config: Configuration) -> Callable[[wcferry.WxMsg], None]:
+    gpt_help: str = """gpt command[me]
   /gpt start 开启gpt
   /gpt stop 关闭gpt
   /gpt enable username 开启用户gpt权限
   /gpt disable username 关闭用户gpt权限
   /gpt help 获取帮助"""
 
-    def process(msg: wcferry.WxMsg):
+    def process(msg: wcferry.WxMsg) -> None:
         if not msg.content.startswith("/gpt"):
             return
-        me = wcf.get_self_wxid()
-        cmm = msg.content
+        me: str = wcf.get_self_wxid()
+        cmm: str = msg.content
         if cmm == "/gpt":
             wcf.send_text('发送"/gpt help"获取帮助', me)
         elif r := re.fullmatch(r"/gpt ([^ ]*?)", msg.content):
@@ -36,7 +37,7 @@ def gpt(wcf: wcferry.Wcf, config: Configuration):
                 case "start":
                     config.chatgpt["enable"] = True
                     config.save_config()
-        elif (r := re.fullmatch("/gpt (.*?) (.*?)", cmm)) is not None:
+        elif r := re.fullmatch("/gpt (.*?) (.*?)", cmm):
             r = r.groups()
             match r[0]:
                 case "enable":
