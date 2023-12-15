@@ -1,3 +1,7 @@
 chatgpt:
+  allow_list:
   - wxid_xxxx1
   - wxid_xxxx2
+  - wxid_xxxx3
+  - wxid_xxxx4
+  enable: true

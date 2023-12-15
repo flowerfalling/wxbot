@@ -30,12 +30,12 @@ class GPT(object):
 
     def __init__(self, wcf: wcferry.Wcf, config: Configuration) -> None:
         self.__wcf: wcferry.Wcf = wcf
-        self.__config: Configuration = config
+        self.__config: Configuration = config.chatgpt
         self.__info: dict[str, GPT._GPTInfo] = {}
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:
         sender = msg.sender
-        if sender not in self.__config.chatgpt:
+        if sender not in self.__config['allow_list'] or not self.__config['enable']:
             return
         user = self.__info.setdefault(sender, GPT._GPTInfo())
         content = msg.content

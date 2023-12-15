@@ -6,6 +6,7 @@
 from wcferry import Wcf
 
 from GPT import GPT
+from Command import gpt
 from suswx import Robot, Content, Configuration
 
 
@@ -14,6 +15,7 @@ def main():
     wcf = Wcf(debug=True)
     sus = Robot(wcf)
     sus.register(GPT(wcf, config).private_reply, Content.TEXT, fromFriend=True)
+    sus.register_command(gpt(wcf, config))
     sus.run()
 
 
