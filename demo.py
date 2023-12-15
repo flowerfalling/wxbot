@@ -5,8 +5,8 @@
 # @Software: PyCharm
 from wcferry import Wcf
 
-from GPT import GPT
 from Command import gpt
+from GPT import GPT
 from suswx import Robot, Content, Configuration
 
 
