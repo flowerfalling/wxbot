@@ -35,7 +35,7 @@ class GPT(object):
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:
         sender = msg.sender
-        if sender not in self.__config['allow_list'] or not self.__config['enable']:
+        if sender not in self.__config["allow_list"] or not self.__config["enable"]:
             return
         user = self.__info.setdefault(sender, GPT._GPTInfo())
         content = msg.content
@@ -43,33 +43,38 @@ class GPT(object):
             self.__wcf.send_text(user.command(content.split(" ")[-1]), sender)
             return
         if user.state or content.startswith("/"):
-            response = self.__reply(content[int(not user.state):], user)
+            if (response := self.__reply(content[int(not user.state) :], user)) is None:
+                return
             user.pmid = response["id"]
             self.__wcf.send_text("[GPT]%s" % response["text"], sender)
 
-    def __reply(self, msg: str, info: "GPT._GPTInfo") -> dict:
-        response = json.loads(
-            requests.post(
-                self.__URL,
-                headers=self.__HEADERS,
-                json={
-                    "prompt": msg,
-                    "options": {"parentMessageId": info.pmid} if info.pmid else {},
-                    "systemMessage": self.__SYSTEM_MESSAGE,
-                    "temperature": info.temperature,
-                    "top_p": info.top_p,
-                },
-            ).text.split("&KFw6loC9Qvy&")[-1]
-        )
-        return {"id": response["id"], "text": response["text"]}
+    def __reply(self, msg: str, info: "GPT._GPTInfo") -> dict | None:
+        try:
+            response = json.loads(
+                requests.post(
+                    self.__URL,
+                    headers=self.__HEADERS,
+                    json={
+                        "prompt": msg,
+                        "options": {"parentMessageId": info.pmid} if info.pmid else {},
+                        "systemMessage": self.__SYSTEM_MESSAGE,
+                        "temperature": info.temperature,
+                        "top_p": info.top_p,
+                    },
+                    timeout=5,
+                ).text.split("&KFw6loC9Qvy&")[-1]
+            )
+            return {"id": response["id"], "text": response["text"]}
+        except requests.exceptions.RequestException as e:
+            return None
 
     class _GPTInfo(object):
-        __GPT_HELP = '''gpt command:
+        __GPT_HELP = """gpt command:
   /xxx 与gpt对话
   /gpt help 获取帮助
   /gpt start 开启gpt连续对话
   /gpt end 关闭gpt连续对话
-  /gpt clear 清空当前会话'''
+  /gpt clear 清空当前会话"""
 
         def __init__(self) -> None:
             self.__state: bool = False

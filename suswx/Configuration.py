@@ -7,7 +7,7 @@ import yaml
 
 
 class Configuration(object):
-    def __init__(self, config_path='./config.yaml'):
+    def __init__(self, config_path="./config.yaml"):
         self.config_path: str = config_path
         self.config: dict = {}
         self.load_config()
@@ -17,7 +17,7 @@ class Configuration(object):
             self.config = yaml.safe_load(f)
 
     def save_config(self):
-        with open(self.config_path, 'w+') as f:
+        with open(self.config_path, "w+") as f:
             yaml.dump(self.config, f)
 
     def __getattr__(self, item):

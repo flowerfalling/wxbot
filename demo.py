@@ -11,7 +11,7 @@ from suswx import Robot, Content, Configuration
 
 
 def main():
-    config = Configuration('./config.yaml')
+    config = Configuration("./config.yaml")
     wcf = Wcf(debug=True)
     sus = Robot(wcf)
     sus.register(GPT(wcf, config).private_reply, Content.TEXT, fromFriend=True)
@@ -19,5 +19,5 @@ def main():
     sus.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
