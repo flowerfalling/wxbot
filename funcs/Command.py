@@ -33,6 +33,27 @@ def gpt(
     return process
 
 
+def gemini(
+        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
+) -> Callable[[wcferry.WxMsg], None]:
+    """
+    A method for only administrator to operate Gemini processing commands
+    :param wcf: your wcf instance
+    :param config: your configuration
+    :param logger: a logger to record command information
+    :return: A callable Gemini-control to register in the robot
+    """
+
+    def process(msg: wcferry.WxMsg) -> None:
+        """
+        the process method for Gemini processing commands
+        :param msg: Pending self's message
+        """
+        _control(wcf, msg, "/gemini", config, logger)
+
+    return process
+
+
 def hitokoto(
         wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
 ) -> Callable[[wcferry.WxMsg], None]:

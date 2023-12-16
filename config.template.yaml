@@ -4,7 +4,13 @@ gpt:
     - wxid_xxxx2
     - wxid_xxxx3
   enable: true
-
+gemini:
+  allow_list:
+    - wxid_xxxx1
+    - wxid_xxxx2
+    - wxid_xxxx3
+  enable: true
+  token:  # Gemini's token
 hitokoto:
   allow_list: # wxid(暂只支持私聊)
     - wxid_xxxx1
