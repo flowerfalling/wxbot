@@ -17,6 +17,7 @@ def gpt(wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> Call
     A method for only administrator to operate gpt processing commands
     :param wcf: your wcf instance
     :param config: your configuration of gpt
+    :param logger: a logger to record command information
     :return: A callable to register in the robot
     """
     gpt_help: str = """gpt command[me]

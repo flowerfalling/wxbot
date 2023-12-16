@@ -65,4 +65,4 @@ gpt command[me]
 
 ## Do not abuse
 
-I **picked up** this API and it could have serious consequences if misused
+I **picked up** this API so it could have serious consequences if misused

@@ -4,6 +4,7 @@
 # @File    : GPT.py
 # @Software: PyCharm
 import json
+import logging
 import time
 
 import requests
@@ -32,7 +33,7 @@ class GPT(object):
         "Accept-Language": "zh-CN,zh;q=0.9",
     }
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration) -> None:
+    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration of gpt
@@ -40,6 +41,7 @@ class GPT(object):
         self.__wcf: wcferry.Wcf = wcf
         self.__config: Configuration = config.chatgpt
         self.__info: dict[str, GPT._GPTInfo] = {}
+        self.__logger: logging.Logger = logger
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:
         """
@@ -61,9 +63,11 @@ class GPT(object):
             user.wait()
             if response := self.__reply(content[int(not user.state):], user):
                 user.pmid = response["id"]
-                self.__wcf.send_text("[GPT]%s" % response["text"], sender)
+                self.__wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
+                self.__logger.info(resp)
             else:
-                self.__wcf.send_text('Sorry, my answer timed out', sender)
+                self.__wcf.send_text(resp := 'Sorry, my answer timed out', sender)
+                self.__logger.info(resp)
             user.wake()
 
     def __reply(self, msg: str, info: "GPT._GPTInfo") -> dict | None:
