@@ -21,7 +21,7 @@ git clone https://github.com/flowerfalling/wxbot.git
 
 ### Dependencies
 
-```Python
+```Shell
 # Update pip
 python -m pip install -U pip
 
@@ -35,7 +35,7 @@ Create a `config.yaml` file and then enter the configuration in the `config.temp
 
 ### Get Start
 
-```Python
+```Shell
 python demo.py
 
 # To stop, press Ctrl+C
