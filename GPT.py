@@ -13,6 +13,9 @@ from suswx import Configuration
 
 
 class GPT(object):
+    """
+    A GPT that can be used for WeChat interaction
+    """
     __URL: str = "http://w5.xjai.cc/api/chat-process"
     __SYSTEM_MESSAGE: str = "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown."
     __HEADERS: dict[str, str] = {
@@ -30,11 +33,19 @@ class GPT(object):
     }
 
     def __init__(self, wcf: wcferry.Wcf, config: Configuration) -> None:
+        """
+        :param wcf: your wcf instance
+        :param config: your configuration of gpt
+        """
         self.__wcf: wcferry.Wcf = wcf
         self.__config: Configuration = config.chatgpt
         self.__info: dict[str, GPT._GPTInfo] = {}
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:
+        """
+        Methods for answering WeChat private messages by GPT
+        :param msg: Pending friend's message
+        """
         sender: str = msg.sender
         if sender not in self.__config["allow_list"] or not self.__config["enable"]:
             return
@@ -56,6 +67,12 @@ class GPT(object):
             user.wake()
 
     def __reply(self, msg: str, info: "GPT._GPTInfo") -> dict | None:
+        """
+        Get GPT answer
+        :param msg: content of message
+        :param info: The wxid of the chat object
+        :return: a tuple of pmid and response's text or None(ConnectionError or other)
+        """
         try:
             response: dict[str, str] = json.loads(
                 requests.post(
@@ -76,6 +93,9 @@ class GPT(object):
             return None
 
     class _GPTInfo(object):
+        """
+        Used to record GPT's records of each session and answer user's command
+        """
         __GPT_HELP: str = """gpt command:
   /xxx 与gpt对话
   /gpt help 获取帮助
@@ -92,24 +112,42 @@ class GPT(object):
 
         @property
         def waiting(self) -> bool:
+            """
+            Whether the user is waiting for a reply
+            """
             return self.__waiting
 
         @property
         def state(self) -> bool:
+            """
+            Whether the user has enabled GPT continuous conversations
+            """
             return self.__state
 
         @property
         def top_p(self) -> float:
+            """
+            User's top_p (between 0 and 1)
+            """
             return self.__top_p
 
         @property
         def temperature(self) -> float:
+            """
+            User's temperature (between 0 and 2)
+            """
             return self.__temperature
 
         def wait(self) -> None:
+            """
+            Set the user's wait status to Wait
+            """
             self.__waiting = True
 
         def wake(self) -> None:
+            """
+            Set the user's wait status to Wake
+            """
             self.__waiting = False
 
         @top_p.setter
@@ -127,6 +165,11 @@ class GPT(object):
                 self.__temperature = value
 
         def command(self, order: str) -> str:
+            """
+            Reply to user's gpt command and Change user's info
+            :param order: User command content
+            :return: Contents of reply command
+            """
             match order:
                 case "start":
                     self.__state = True

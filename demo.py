@@ -3,20 +3,37 @@
 # @Author  : 之落花--falling_flowers
 # @File    : demo.py
 # @Software: PyCharm
+import logging
+
 from wcferry import Wcf
 
 from Command import gpt
 from GPT import GPT
 from suswx import Robot, Content, Configuration
 
+logging.basicConfig(
+    datefmt="%Y-%m-%d %H:%M:%S",
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    level=logging.INFO,
+)
+
+
+class SusRobot:
+    def __init__(self):
+        self.logger: logging.Logger = logging.getLogger("SUSBOT")
+        self.wcf: Wcf = Wcf(debug=True)
+        self.sus: Robot = Robot(self.wcf, self.logger)
+        self.config: Configuration = Configuration("./config.yaml")
+        self.sus.register(GPT(self.wcf, self.config).private_reply, (Content.TEXT,), fromFriend=True)
+        self.sus.register_command(gpt(self.wcf, self.config, self.logger))
+
+    def run(self):
+        self.sus.run()
+
 
 def main():
-    config: Configuration = Configuration("./config.yaml")
-    wcf: Wcf = Wcf(debug=True)
-    sus: Robot = Robot(wcf)
-    sus.register(GPT(wcf, config).private_reply, Content.TEXT, fromFriend=True)
-    sus.register_command(gpt(wcf, config))
-    sus.run()
+    susbot = SusRobot()
+    susbot.run()
 
 
 if __name__ == "__main__":

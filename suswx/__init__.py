@@ -7,4 +7,3 @@
 from suswx.Robot import Robot
 from suswx.Content import Content
 from suswx.Configuration import Configuration
-from suswx import Config
