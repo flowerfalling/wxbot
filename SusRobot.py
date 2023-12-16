@@ -19,7 +19,10 @@ logging.basicConfig(
 
 
 class SusRobot:
-    def __init__(self):
+    """
+    A WeChat Robot demo
+    """
+    def __init__(self) -> None:
         self.logger: logging.Logger = logging.getLogger("SUSBOT")
         self.wcf: Wcf = Wcf(debug=True)
         self.sus: Robot = Robot(self.wcf, self.logger)
@@ -27,11 +30,14 @@ class SusRobot:
         self.sus.register(GPT(self.wcf, self.config).private_reply, (Content.TEXT,), fromFriend=True)
         self.sus.register_command(gpt(self.wcf, self.config, self.logger))
 
-    def run(self):
+    def run(self) -> None:
+        """
+        Start the robot
+        """
         self.sus.run()
 
 
-def main():
+def main() -> None:
     susbot = SusRobot()
     susbot.run()
 
