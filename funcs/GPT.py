@@ -69,7 +69,7 @@ class GPT(object):
                 self.__wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
                 self.__logger.info(resp)
             else:
-                self.__wcf.send_text(resp := "Sorry, my answer timed out", sender)
+                self.__wcf.send_text(resp := "Sorry, GPT's answer timed out", sender)
                 self.__logger.info(resp)
             user.wake()
 
