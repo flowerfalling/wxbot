@@ -35,7 +35,7 @@ class GPT(object):
     }
 
     def __init__(
-        self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
+            self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
     ) -> None:
         """
         :param wcf: your wcf instance

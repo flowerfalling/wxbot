@@ -12,6 +12,7 @@ class Configuration(object):
 
     Do not write keys whose names are object's attributes or method names in the configuration file.
     """
+
     def __init__(self, config_path="./config.yaml") -> None:
         """
         :param config_path: config file path
@@ -34,7 +35,7 @@ class Configuration(object):
         with open(self.config_path, "w+") as f:
             yaml.dump(self.config, f)
 
-    def __getattr__(self, item: str) -> object:
+    def __getattr__(self, item: str) -> dict:
         """
         Get configuration information from self.config
         :param item: a key of configuration

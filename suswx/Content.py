@@ -10,6 +10,7 @@ class Content(Enum):
     """
     Allowed WeChat message type for message processing (temporarily supported)
     """
+
     TEXT: int = 1
     PICTURE: int = 3
     AUDIO: int = 34
