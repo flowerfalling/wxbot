@@ -25,14 +25,14 @@ class Configuration(object):
         """
         Load configuration by config file
         """
-        with open(self.config_path) as f:
+        with open(self.config_path, encoding='utf-8') as f:
             self.config = yaml.safe_load(f)
 
     def save_config(self) -> None:
         """
         Save configuration to config file
         """
-        with open(self.config_path, "w+") as f:
+        with open(self.config_path, "w+", encoding='utf-8') as f:
             yaml.dump(self.config, f)
 
     def __getattr__(self, item: str) -> dict:
