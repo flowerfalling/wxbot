@@ -17,6 +17,7 @@ class GPT(object):
     """
     A GPT that can be used for WeChat interaction
     """
+
     __URL: str = "http://w5.xjai.cc/api/chat-process"
     __SYSTEM_MESSAGE: str = "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown."
     __HEADERS: dict[str, str] = {
@@ -33,13 +34,15 @@ class GPT(object):
         "Accept-Language": "zh-CN,zh;q=0.9",
     }
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+    def __init__(
+        self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
+    ) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration of gpt
         """
         self.__wcf: wcferry.Wcf = wcf
-        self.__config: Configuration = config.chatgpt
+        self.__config: Configuration = config.gpt
         self.__info: dict[str, GPT._GPTInfo] = {}
         self.__logger: logging.Logger = logger
 
@@ -66,7 +69,7 @@ class GPT(object):
                 self.__wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
                 self.__logger.info(resp)
             else:
-                self.__wcf.send_text(resp := 'Sorry, my answer timed out', sender)
+                self.__wcf.send_text(resp := "Sorry, my answer timed out", sender)
                 self.__logger.info(resp)
             user.wake()
 
@@ -100,6 +103,7 @@ class GPT(object):
         """
         Used to record GPT's records of each session and answer user's command
         """
+
         __GPT_HELP: str = """gpt command:
   /xxx 与gpt对话
   /gpt help 获取帮助
