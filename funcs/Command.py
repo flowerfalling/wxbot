@@ -75,14 +75,14 @@ def _control(
         return
     me: str = wcf.get_self_wxid()
     k: str = key[1:]
-    if cmm := msg.content == key:
+    if (cmm := msg.content) == key:
         wcf.send_text(f'send "{key} help" to get help docs', me)
     elif cmm == f"{key} start":
         config.__getattr__(k)["enable"] = True
         config.save_config()
         logger.info(f"{k} has been turned on")
     elif cmm == f"{key} stop":
-        config.__getattr__(k)["enable"] = True
+        config.__getattr__(k)["enable"] = False
         config.save_config()
         logger.info(f"{k} has been stopped")
     elif cmm == f"{key} help":
@@ -93,13 +93,12 @@ def _control(
   {key} disable username 关闭用户{k}权限
   {key} help 获取帮助"""
         wcf.send_text(help_docs, me)
-    elif r := re.fullmatch("/gpt (enable|disable) (.*?)", cmm):
+    elif r := re.fullmatch(f"{key} (enable|disable) (.*?)", cmm):
         r = r.groups()
+        allow_list = config.__getattr__(k)["allow_list"]
         for i in wcf.get_friends():
-            if i["name"] == r[1] and (r[1] in config.gpt) ^ (m := r[0] == "enable"):
-                config.__getattr__(k)["allow_list"].__getattr__(
-                    "append" if m else "remove"
-                )(i["wxid"])
+            if i["name"] == r[1] and (i['wxid'] in allow_list) ^ (m := r[0] == "enable"):
+                allow_list.append(i['wxid']) if m else allow_list.remove(i['wxid'])
                 config.save_config()
                 logger.info(
                     "%s permission has been turned %s for user [%s]",

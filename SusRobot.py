@@ -8,7 +8,7 @@ import logging
 from wcferry import Wcf
 
 from funcs import funcs
-from funcs.Command import gpt
+from funcs.Command import gpt, hitokoto
 from funcs.GPT import GPT
 from suswx import Robot, Content, Configuration
 
@@ -30,12 +30,13 @@ class SusRobot:
         self.sus: Robot = Robot(self.wcf, self.logger)
         self.config: Configuration = Configuration("./config.yaml")
         self.sus.register(
-            GPT(self.wcf, self.config).private_reply, (Content.TEXT,), fromFriend=True
+            GPT(self.wcf, self.config, self.logger).private_reply, (Content.TEXT,), fromFriend=True
         )
         self.sus.register(
-            funcs.hitokoto(self.wcf, self.config), (Content.TEXT.TEXT,), fromFriend=True
+            funcs.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True
         )
         self.sus.register_command(gpt(self.wcf, self.config, self.logger))
+        self.sus.register_command(hitokoto(self.wcf, self.config, self.logger))
 
     def run(self) -> None:
         """

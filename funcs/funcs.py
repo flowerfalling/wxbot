@@ -35,11 +35,11 @@ def hitokoto(
                         msg.content == "@一言",
                 )
         ):
-            resp = requests.get("v1.hitokoto.cn", timeout=3).json()
+            resp = requests.get("https://v1.hitokoto.cn", timeout=3).json()
             wcf.send_text(
-                response := f'{resp["hitokoto"]}\n--{resp["from"]}[{resp["from_who"]}]',
+                response := f'{resp["hitokoto"]}\n----{resp["from"]}[{resp["from_who"]}]',
                 msg.sender,
             )
-            logger.info(response)
+            logger.info(response.replace('\n', '\\n'))
 
     return process
