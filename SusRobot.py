@@ -9,8 +9,7 @@ from wcferry import Wcf
 
 from funcs import funcs
 from funcs.Command import gpt, gemini, hitokoto
-from funcs.GPT import GPT
-from funcs.Gemini import Gemini
+from funcs.AI import Gemini, GPT
 from suswx import Robot, Content, Configuration
 
 logging.basicConfig(
@@ -38,6 +37,9 @@ class SusRobot:
         )
         self.sus.register(
             funcs.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True
+        )
+        self.sus.register(
+            funcs.menu(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True
         )
         self.sus.register_command(gpt(self.wcf, self.config, self.logger))
         self.sus.register_command(gemini(self.wcf, self.config, self.logger))

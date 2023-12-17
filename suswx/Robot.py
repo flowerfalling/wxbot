@@ -10,6 +10,7 @@ import time
 from threading import Thread
 from typing import Callable
 
+import wcferry
 from wcferry import Wcf, WxMsg
 
 from suswx import Content
@@ -29,6 +30,7 @@ class Robot(object):
             i: ([], []) for i in (0, 1, 3, 37, 47, 1090519089)
         }  # (私聊, 组群), 0为自己
         self.logger: logging.Logger = logger
+        atexit.register(Robot.quit, self.wcf)
 
     def run(self) -> None:
         """
@@ -93,10 +95,10 @@ class Robot(object):
         """
         self.registry[0][0].append(func)
 
-    @atexit.register
-    def quit(self) -> None:
+    @staticmethod
+    def quit(wcf: wcferry.Wcf) -> None:
         """
         Release wcf when program exits in order to exit normally
         """
-        self.wcf.cleanup()
+        wcf.cleanup()
         print("Quit done")
