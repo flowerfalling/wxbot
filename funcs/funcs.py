@@ -55,10 +55,10 @@ def menu(
     :param logger: a logger to record command information
     :return: A callable hitokoto to register in the robot
     """
-    MENU = '''1./gpt help
-2.%gemini help
-3.@一言
-4.@菜单'''
+    MENU = '''- /gpt help
+- %gemini help
+- @一言
+- @菜单'''
 
     def process(msg: wcferry.WxMsg) -> None:
         """
