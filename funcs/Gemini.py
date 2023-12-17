@@ -17,10 +17,12 @@ class Gemini(object):
     """
     A Gemini that can be used for WeChat interaction
     """
+
     def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration of Gemini
+        :param logger: the logger instance
         """
         self.__wcf: wcferry.Wcf = wcf
         self.__config: Configuration = config.gemini
@@ -48,7 +50,8 @@ class Gemini(object):
                     time.sleep(0.5)
             user.wait()
             try:
-                response = user.chat.send_message(content=content[int(not user.state):])
+                response: genai.types.GenerateContentResponse = user.chat.send_message(
+                    content=content[int(not user.state):])
                 self.__wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
                 self.__logger.info(resp)
             except google.api_core.exceptions.GoogleAPIError:
@@ -86,6 +89,9 @@ class Gemini(object):
 
         @property
         def state(self) -> bool:
+            """
+            Whether the user has enabled continuous dialogue with AI
+            """
             return self.__state
 
         def wait(self) -> None:
