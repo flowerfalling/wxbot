@@ -75,6 +75,27 @@ def hitokoto(
     return process
 
 
+def menu(
+        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
+) -> Callable[[wcferry.WxMsg], None]:
+    """
+    A method for only administrator to operate hitokoto processing commands
+    :param wcf: your wcf instance
+    :param config: your configuration
+    :param logger: a logger to record command information
+    :return: A callable hitokoto-control to register in the robot
+    """
+
+    def process(msg: wcferry.WxMsg) -> None:
+        """
+        the process method for hitokoto processing commands
+        :param msg:
+        """
+        _control(wcf, msg, "/menu", config, logger)
+
+    return process
+
+
 def _control(
         wcf: wcferry.Wcf,
         msg: wcferry.WxMsg,

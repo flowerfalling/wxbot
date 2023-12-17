@@ -35,11 +35,43 @@ def hitokoto(
                         msg.content == "@一言",
                 )
         ):
-            resp = requests.get("https://v1.hitokoto.cn", timeout=3).json()
+            resp: dict = requests.get("https://v1.hitokoto.cn", timeout=3).json()
             wcf.send_text(
                 response := f'{resp["hitokoto"]}\n----{resp["from"]}[{resp["from_who"]}]',
                 msg.sender,
             )
             logger.info(response.replace('\n', '\\n'))
+
+    return process
+
+
+def menu(
+        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
+) -> Callable[[wcferry.WxMsg], None]:
+    """
+    menu func that can be used to send func list for WeChat
+    :param wcf: your wcf instance
+    :param config: your configuration
+    :param logger: a logger to record command information
+    :return: A callable hitokoto to register in the robot
+    """
+    MENU = '''1./gpt help
+2.%gemini help
+3.@一言
+4.@菜单'''
+
+    def process(msg: wcferry.WxMsg) -> None:
+        """
+        the process method for menu sending sentence
+        :param msg: Pending self's message
+        """
+        if all(
+                (
+                        msg.sender in config.menu["allow_list"],
+                        config.menu["enable"],
+                        msg.content == "@菜单",
+                )
+        ):
+            wcf.send_text(MENU, msg.sender)
 
     return process
