@@ -12,7 +12,13 @@ gemini:
   enable: true
   token:  # Gemini's token
 hitokoto:
-  allow_list: # wxid(暂只支持私聊)
+  allow_list:
+    - wxid_xxxx1
+    - wxid_xxxx2
+    - wxid_xxxx3
+  enable: true
+menu:
+  allow_list:
     - wxid_xxxx1
     - wxid_xxxx2
     - wxid_xxxx3
