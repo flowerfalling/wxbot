@@ -30,8 +30,8 @@ def hitokoto(
         """
         if all(
                 (
-                        msg.sender in config.hitokoto["allow_list"],
-                        config.hitokoto["enable"],
+                        msg.sender in config["hitokoto"]["access"],
+                        config["hitokoto"]["enable"],
                         msg.content == "@一言",
                 )
         ):
@@ -67,8 +67,8 @@ def menu(
         """
         if all(
                 (
-                        msg.sender in config.menu["allow_list"],
-                        config.menu["enable"],
+                        msg.sender in config["menu"]["access"],
+                        config["menu"]["enable"],
                         msg.content == "@菜单",
                 )
         ):

@@ -34,13 +34,10 @@ class Configuration(object):
         """
         with open(self.config_path, "w+", encoding='utf-8') as f:
             yaml.dump(self.config, f)
+        self.load_config()
 
-    def __getattr__(self, item: str) -> dict:
-        """
-        Get configuration information from self.config
-        :param item: a key of configuration
-        :return: the value of self.config
-        """
+    def __getitem__(self, item: str) -> dict:
         if item in self.config:
             return self.config[item]
-        super().__getattribute__(item)
+        raise None
+

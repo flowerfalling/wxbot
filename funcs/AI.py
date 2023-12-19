@@ -53,8 +53,8 @@ class _AI(ABC):
     ) -> None:
         sender: str = msg.sender
         ai_name, ai_key = self.name, self.key
-        config = self._config.__getattr__(ai_name.lower())
-        if sender not in config["allow_list"] or not config["enable"]:
+        config = self._config[ai_name.lower()]
+        if sender not in config["access"] or not config["enable"]:
             return
         user_info: _T = self.__info.setdefault(sender, get_default_info())
         content: str = msg.content

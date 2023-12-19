@@ -5,7 +5,6 @@
 # @Software: PyCharm
 import logging
 import re
-from typing import Callable
 
 import wcferry
 
@@ -18,147 +17,48 @@ class Permission(object):
         self.__config = config
         self.__logger = logger
 
+    def __call__(self, msg: wcferry.WxMsg) -> None:
+        if msg.content == "/help":  # TODO help docs
+            ...
+        elif msg.content == "/state":  # TODO state
+            ...
+        elif c := re.fullmatch('/(enable|disable) (.*?) (.*?)', msg.content):
+            command = c.groups()
+            mode = command[0]
+            users = command[1].split(",")
+            funcs = command[2].split(".")
+            self.update_access(users, funcs, mode)
+        elif c := re.fullmatch('/(start|stop) (.*?)', msg.content):
+            command = c.groups()
+            mode = command[0]
+            funcs = command[1].split(",")
+            for f in funcs:
+                if self.__config[f] is None:
+                    self.__logger.info(f"function {f} does not exist")
+                    continue
+                self.__config[f]["enable"] = mode == 'start'
+                self.__logger.info(f"{f} has been turned {'on' if mode == 'start' else 'off'}")
+        self.__config.save_config()
 
-def permission_change(
-        config: Configuration, logger: logging.Logger
-) -> Callable[[wcferry.WxMsg], None]:
-    def process(msg: wcferry) -> None:
-        if r := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
-            pass
-    return process
-
-
-def gpt(
-        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
-) -> Callable[[wcferry.WxMsg], None]:
-    """
-    A method for only administrator to operate gpt processing commands
-    :param wcf: your wcf instance
-    :param config: your configuration
-    :param logger: a logger to record command information
-    :return: A callable gpt-control to register in the robot
-    """
-
-    def process(msg: wcferry.WxMsg) -> None:
-        """
-        the process method for gpt processing commands
-        :param msg: Pending self's message
-        """
-        _control(wcf, msg, "/gpt", config, logger)
-
-    return process
-
-
-def gemini(
-        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
-) -> Callable[[wcferry.WxMsg], None]:
-    """
-    A method for only administrator to operate Gemini processing commands
-    :param wcf: your wcf instance
-    :param config: your configuration
-    :param logger: a logger to record command information
-    :return: A callable Gemini-control to register in the robot
-    """
-
-    def process(msg: wcferry.WxMsg) -> None:
-        """
-        the process method for Gemini processing commands
-        :param msg: Pending self's message
-        """
-        _control(wcf, msg, "/gemini", config, logger)
-
-    return process
-
-
-def hitokoto(
-        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
-) -> Callable[[wcferry.WxMsg], None]:
-    """
-    A method for only administrator to operate hitokoto processing commands
-    :param wcf: your wcf instance
-    :param config: your configuration
-    :param logger: a logger to record command information
-    :return: A callable hitokoto-control to register in the robot
-    """
-
-    def process(msg: wcferry.WxMsg) -> None:
-        """
-        the process method for hitokoto processing commands
-        :param msg:
-        """
-        _control(wcf, msg, "/hitokoto", config, logger)
-
-    return process
-
-
-def menu(
-        wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
-) -> Callable[[wcferry.WxMsg], None]:
-    """
-    A method for only administrator to operate hitokoto processing commands
-    :param wcf: your wcf instance
-    :param config: your configuration
-    :param logger: a logger to record command information
-    :return: A callable hitokoto-control to register in the robot
-    """
-
-    def process(msg: wcferry.WxMsg) -> None:
-        """
-        the process method for hitokoto processing commands
-        :param msg:
-        """
-        _control(wcf, msg, "/menu", config, logger)
-
-    return process
-
-
-def _control(
-        wcf: wcferry.Wcf,
-        msg: wcferry.WxMsg,
-        key: str,
-        config: Configuration,
-        logger: logging.Logger,
-) -> None:
-    """
-    The _control function is an internal part of the software that governs how the program responds to certain message content.
-
-    It uses a specified key to control different functionality including the start and stop commands, as well as enabling or disabling certain users.
-    :param wcf: your wcf instance
-    :param msg: Pending self's message
-    :param key: Keywords of the command, such as /gpt (corresponding in config.yaml)
-    :param config: your configuration
-    :param logger: a logger to record command information
-    """
-    if not msg.content.startswith(key):
-        return
-    me: str = wcf.get_self_wxid()
-    k: str = key[1:]
-    if (cmm := msg.content) == key:
-        wcf.send_text(f'send "{key} help" to get help docs', me)
-    elif cmm == f"{key} start":
-        config.__getattr__(k)["enable"] = True
-        config.save_config()
-        logger.info(f"{k} has been turned on")
-    elif cmm == f"{key} stop":
-        config.__getattr__(k)["enable"] = False
-        config.save_config()
-        logger.info(f"{k} has been stopped")
-    elif cmm == f"{key} help":
-        help_docs = f"""{k} command[me]
-  {key} start 开启gpt
-  {key} stop 关闭gpt
-  {key} enable username 开启用户{k}权限
-  {key} disable username 关闭用户{k}权限
-  {key} help 获取帮助"""
-        wcf.send_text(help_docs, me)
-    elif r := re.fullmatch(f"{key} (enable|disable) (.*?)", cmm):
-        r = r.groups()
-        allow_list = config.__getattr__(k)["allow_list"]
-        for i in wcf.get_friends():
-            if i["name"] == r[1] and (i['wxid'] in allow_list) ^ (m := r[0] == "enable"):
-                allow_list.append(i['wxid']) if m else allow_list.remove(i['wxid'])
-                config.save_config()
-                logger.info(
-                    "%s permission has been turned %s for user [%s]",
-                    key, "on" if m else "off", r[1],
-                )
+    def update_access(self, users: list[str], funcs: list[str], mode: str) -> None:
+        my_friends = self.__wcf.get_friends()
+        if stranger := set(users) - {i['name'] for i in my_friends}:
+            self.__logger.info(f"{stranger} are not your friends, please check the username")
+        for f in funcs:
+            if self.__config[f] is None:
+                self.__logger.info(f"function {f} does not exist")
+                continue
+            for i in my_friends:
+                if i["name"] in users:
+                    if mode == "enable":
+                        if i["wxid"] not in self.__config[f]["access"]:
+                            self.__config[f]["access"].append(i["wxid"])
+                            self.__logger.info(f"The {f} access has been turned on for user [{i['name']}]")
+                        else:
+                            self.__logger.info(f"The user [{i['name']}]'s {f} access already exists")
+                    elif mode == "disable":
+                        if i["wxid"] in self.__config[f]["access"]:
+                            self.__config[f]["access"].remove(i["wxid"])
+                            self.__logger.info(f"The {f} access has been turned off for user [{i['name']}]")
+                        else:
+                            self.__logger.info(f"The user [{i['name']}]'s {f} access no longer exists")
