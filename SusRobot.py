@@ -8,8 +8,8 @@ import logging
 from wcferry import Wcf
 
 from funcs import funcs
-from funcs.Command import gpt, gemini, hitokoto
 from funcs.AI import Gemini, GPT
+from funcs.Command import gpt, gemini, hitokoto
 from suswx import Robot, Content, Configuration
 
 logging.basicConfig(

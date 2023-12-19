@@ -37,8 +37,9 @@ class Robot(object):
         Keep the bot running and processing information
         """
         self.wcf.enable_receiving_msg()
+        interval: float = 0.5
         while self.wcf.is_receiving_msg():
-            time.sleep(0.5)
+            time.sleep(interval)
             try:
                 msg: WxMsg = self.wcf.get_msg()
                 if msg.from_self() and msg.content == "/quit":
