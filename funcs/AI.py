@@ -162,6 +162,10 @@ class Gemini(_AI):
             self._wcf.send_text(resp := "Sorry, your prompt has been blocked", sender)
             self._logger.info(resp)
             self._logger.info(e)
+        except google.generativeai.types.generation_types.StopCandidateException as e:
+            self._wcf.send_text(resp := "Sorry, An exception occurs at the candidate", sender)
+            self._logger.info(resp)
+            self._logger.info(e)
 
     class _GeminiInfo(_AI.AIInfo):
         __Gemini_HELP: str = """Gemini command:
