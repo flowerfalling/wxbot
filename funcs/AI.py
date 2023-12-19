@@ -40,7 +40,11 @@ class _AI(ABC):
 
     @abstractmethod
     def private_reply(self, msg: wcferry.WxMsg) -> None:
-        pass
+        """
+        Function to reply to private message
+        :param msg: 要处理的消息
+        """
+        ...
 
     def _reply(
             self,
@@ -66,8 +70,13 @@ class _AI(ABC):
             user_info.wake()
 
     @abstractmethod
-    def _get_ai_response(self, content: str, sender: str, user: "_T") -> None:
-        pass
+    def _get_ai_response(self, content: str, sender: str, user_info: "_T") -> None:
+        """
+        Function to get AI's reply
+        :param content: Message content
+        :param sender: sender's wxid
+        :param user_info: sender's info
+        """
 
     class AIInfo(ABC):
         """
@@ -108,9 +117,20 @@ class _AI(ABC):
 
         @abstractmethod
         def command(self, order: str) -> str:
-            pass
+            """
+            Used to process user commands for AI
+            :param order: the user's command content
+            """
+            ...
 
         def _process_command(self, order: str, clear_func: Callable, help_docs: str) -> str:
+            """
+            Several methods for handling user commands to AI by default
+            :param order: the user's command content
+            :param clear_func: function to clear AI's memory
+            :param help_docs: AI's help documentation
+            :return:
+            """
             match order:
                 case "start":
                     self.__state = True
@@ -129,10 +149,15 @@ class _AI(ABC):
 
 class Gemini(_AI):
     """
-    Used to record Gemini's records of each session and answer user's command
+    A Gemini that can be used for WeChat interaction
     """
 
     def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+        """
+        :param wcf: your wcf instance
+        :param config: your configuration of Gemini
+        :param logger: the logger instance
+        """
         super().__init__(wcf, config, logger)
         self.name = "Gemini"
         self.key = "%"
@@ -149,10 +174,10 @@ class Gemini(_AI):
             get_default_info=lambda: Gemini._GeminiInfo(self.__model),
         )
 
-    def _get_ai_response(self, content: str, sender: str, user: "Gemini._GeminiInfo") -> None:
+    def _get_ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
         try:
-            response: genai.types.GenerateContentResponse = user.chat.send_message(
-                content=content[int(not user.state):])
+            response: genai.types.GenerateContentResponse = user_info.chat.send_message(
+                content=content[int(not user_info.state):])
             self._wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
             self._logger.info(resp)
         except google.api_core.exceptions.GoogleAPIError:
@@ -168,6 +193,10 @@ class Gemini(_AI):
             self._logger.info(e)
 
     class _GeminiInfo(_AI.AIInfo):
+        """
+        Used to record Gemini's records of each session and answer user's command
+        """
+
         __Gemini_HELP: str = """Gemini command:
   %xxx 与Gemini对话
   %gemini help 获取帮助
@@ -211,6 +240,11 @@ class GPT(_AI):
     }
 
     def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+        """
+        :param wcf: your wcf instance
+        :param config: your configuration of Gemini
+        :param logger: the logger instance
+        """
         super().__init__(wcf, config, logger)
         self.name: str = "GPT"
         self.key: str = "/"
@@ -221,9 +255,9 @@ class GPT(_AI):
             get_default_info=GPT._GPTInfo
         )
 
-    def _get_ai_response(self, content: str, sender: str, user: "_T") -> None:
-        if response := self.__get_reply(content[int(not user.state):], user):
-            user.pmid = response["id"]
+    def _get_ai_response(self, content: str, sender: str, user_info: "_T") -> None:
+        if response := self.__get_reply(content[int(not user_info.state):], user_info):
+            user_info.pmid = response["id"]
             self._wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
             self._logger.info(resp)
         else:
@@ -260,6 +294,7 @@ class GPT(_AI):
         """
         Used to record GPT's records of each session and answer user's command
         """
+
         __GPT_HELP: str = """gpt command:
   /xxx 与gpt对话
   /gpt help 获取帮助

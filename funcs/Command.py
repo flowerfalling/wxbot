@@ -12,6 +12,22 @@ import wcferry
 from suswx import Configuration
 
 
+class Permission(object):
+    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+        self.__wcf = wcf
+        self.__config = config
+        self.__logger = logger
+
+
+def permission_change(
+        config: Configuration, logger: logging.Logger
+) -> Callable[[wcferry.WxMsg], None]:
+    def process(msg: wcferry) -> None:
+        if r := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
+            pass
+    return process
+
+
 def gpt(
         wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger
 ) -> Callable[[wcferry.WxMsg], None]:
