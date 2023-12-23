@@ -12,23 +12,33 @@ from suswx import Configuration
 
 
 class Permission(object):
+    HELP_DOCS = """Permission documentation
+  /help 获取帮助
+  /state 查看功能状态
+  /disable|enable name1[,name2[,name3[...]]] func1[,func2[,func3[...]] 开启|禁止某人某功能权限
+  /start|stop func1[,func2[,func3[...]] 开启|停止功能
+    """
+
     def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
         self.__wcf = wcf
         self.__config = config
         self.__logger = logger
 
     def __call__(self, msg: wcferry.WxMsg) -> None:
-        if msg.content == "/help":  # TODO help docs
-            ...
-        elif msg.content == "/state":  # TODO state
-            ...
-        elif c := re.fullmatch('/(enable|disable) (.*?) (.*?)', msg.content):
+        if msg.content == "/help":
+            self.__wcf.send_text(self.HELP_DOCS, self.__wcf.get_self_wxid())
+        elif msg.content == "/state":
+            funcs = self.__config.config.keys()
+            self.__wcf.send_text(
+                "  STATE\n" + "".join((f"- {i}: {'enable' if self.__config[i]['enable'] else 'disable'}\n" for i in funcs)),
+                self.__wcf.get_self_wxid())
+        elif c := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
             command = c.groups()
             mode = command[0]
             users = command[1].split(",")
-            funcs = command[2].split(".")
+            funcs = command[2].split(",")
             self.update_access(users, funcs, mode)
-        elif c := re.fullmatch('/(start|stop) (.*?)', msg.content):
+        elif c := re.fullmatch("/(start|stop) (.*?)", msg.content):
             command = c.groups()
             mode = command[0]
             funcs = command[1].split(",")

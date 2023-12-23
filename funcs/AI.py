@@ -161,7 +161,7 @@ class Gemini(_AI):
         super().__init__(wcf, config, logger)
         self.name = "Gemini"
         self.key = "%"
-        genai.configure(api_key=config.gemini['token'])
+        genai.configure(api_key=config["gemini"]['token'])
         self.__model: genai.GenerativeModel = genai.GenerativeModel('gemini-pro')
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:

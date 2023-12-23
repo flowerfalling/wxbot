@@ -42,9 +42,6 @@ class SusRobot:
             funcs.menu(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True
         )
         self.sus.register_command(Permission(self.wcf, self.config, self.logger))
-        # self.sus.register_command(gpt(self.wcf, self.config, self.logger))
-        # self.sus.register_command(gemini(self.wcf, self.config, self.logger))
-        # self.sus.register_command(hitokoto(self.wcf, self.config, self.logger))
 
     def run(self) -> None:
         """
