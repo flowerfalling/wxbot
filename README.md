@@ -4,6 +4,18 @@ Papersus's Wxbot is a WeChat bot with ChatGPT(only Windows)
 
 WeChat robot framework and examples based on wcferry
 
+<details><summary>Disclaimer[mandatory reading]</summary>
+
+The author of this tool makes no warranty, express or implied, as to the safety, completeness, reliability, validity, correctness, or suitability of this tool, and assumes no responsibility for any direct or indirect loss, liability, claim, demand, or action resulting from the use or misuse of this tool.
+
+The author of this tool reserves the right to modify, update, delete or terminate this tool at any time without prior notice or obligation.
+
+Users of the Tool shall comply with relevant laws and regulations, respect WeChat's copyright and privacy, and shall not infringe upon the legitimate rights and interests of WeChat or other third parties, or engage in any illegal or unethical behavior.
+
+By downloading, installing, running or using the Tool, users of the Tool acknowledge that they have read and agree to this disclaimer. If you have any objection, please stop using the Tool immediately and delete all related files.
+
+</details>
+
 ## Basic Usage
 
 Now the bot only supports private chats, and does not support group chats for the time being
@@ -43,6 +55,8 @@ python demo.py
 # To stop, press Ctrl+C
 ```
 
+<details><summary>Feature</summary>
+
 #### Users' command(your friends)
 
 ```Text
@@ -55,20 +69,20 @@ python demo.py
 
 ```Text
 gpt command:
-/xxx  # 与gpt对话
-/gpt help  # 获取帮助
-/gpt start  # 开启gpt连续对话
-/gpt end  # 关闭gpt连续对话
-/gpt clear  # 清空当前会话
+/xxx  # Talk to GPT
+/gpt help  # Get help
+/gpt start  # Enable GPT continuous conversation
+/gpt end  # Disable GPT continuous conversation
+/gpt clear  # Clear current session records
 ```
 
 ```Text
 gemini command:
-%xxx  # 与gpt对话
-%gemini help  # 获取帮助
-%gemini start  # 开启gpt连续对话
-%gemini end  # 关闭gpt连续对话
-%gemini clear  # 清空当前会话
+%xxx  # Talk to Gemini
+%gemini help  # Get help
+%gemini start  # Enable Gemini continuous conversation
+%gemini end  # Disable Gemini continuous conversation
+%gemini clear  # Clear current session records
 ```
 
 #### Administrator's command(you)
@@ -84,11 +98,14 @@ Call any of them func
 
 ```Text
 Administrator documentation
-  /help  # get help
+  /help  # Get help
   /state  # View functions' status
   /disable|enable name1[,name2[...]] func1[,func2[...]]  # Enable | Disable someone's permission for some functions
-  /start|stop func1[,func2[,func3[...]] Start | Stop functions
+  /start|stop func1[,func2[,func3[...]]  # Start | Stop functions
+  /quit  # Exit robot
 ```
+
+</details>
 
 ## Do not abuse gpt
 
