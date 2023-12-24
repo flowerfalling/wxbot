@@ -50,25 +50,25 @@ python demo.py
 ```
 
 ```Text
+@一言  # get a sentence
+```
+
+```Text
 gpt command:
-  /xxx  # 与gpt对话
-  /gpt help  # 获取帮助
-  /gpt start  # 开启gpt连续对话
-  /gpt end  # 关闭gpt连续对话
-  /gpt clear  # 清空当前会话
+/xxx  # 与gpt对话
+/gpt help  # 获取帮助
+/gpt start  # 开启gpt连续对话
+/gpt end  # 关闭gpt连续对话
+/gpt clear  # 清空当前会话
 ```
 
 ```Text
 gemini command:
-  %xxx  # 与gpt对话
-  %gemini help  # 获取帮助
-  %gemini start  # 开启gpt连续对话
-  %gemini end  # 关闭gpt连续对话
-  %gemini clear  # 清空当前会话
-```
-
-```Text
-@一言  # get a sentence
+%xxx  # 与gpt对话
+%gemini help  # 获取帮助
+%gemini start  # 开启gpt连续对话
+%gemini end  # 关闭gpt连续对话
+%gemini clear  # 清空当前会话
 ```
 
 #### Administrator's command(you)
@@ -83,12 +83,11 @@ The following functions are currently available:
 Call any of them func
 
 ```Text
-func command[me]
-  /func start 开启func
-  /func stop 关闭func
-  /func enable username 开启用户func权限
-  /func disable username 关闭用户func权限
-  /func help 获取帮助
+Administrator documentation
+  /help  # get help
+  /state  # View functions' status
+  /disable|enable name1[,name2[...]] func1[,func2[...]]  # Enable | Disable someone's permission for some functions
+  /start|stop func1[,func2[,func3[...]] Start | Stop functions
 ```
 
 ## Do not abuse gpt

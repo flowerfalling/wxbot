@@ -7,7 +7,7 @@ import logging
 
 from funcs import funcs
 from funcs.AI import Gemini, GPT
-from funcs.Command import Permission
+from funcs.Command import Administrator
 from suswx import robot, Content, Configuration
 
 logging.basicConfig(
@@ -43,7 +43,7 @@ class SusRobot:
         self.sus.register(
             funcs.menu(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
         )
-        self.sus.register_command(Permission(self.wcf, self.config, self.logger, self.admin), (Content.TEXT,))
+        self.sus.register_command(Administrator(self.wcf, self.config, self.logger, self.admin), (Content.TEXT,))
 
     def run(self) -> None:
         """

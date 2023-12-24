@@ -12,15 +12,15 @@ import wcferry
 from suswx import Configuration
 
 
-class Permission(object):
+class Administrator(object):
     """
     Operate robot functions and control other people’s permissions
     """
 
-    HELP_DOCS: str = """Permission documentation
+    HELP_DOCS: str = """Administrator documentation
   /help 获取帮助
   /state 查看功能状态
-  /disable|enable name1[,name2[,name3[...]]] func1[,func2[,func3[...]] 开启|禁止某人某功能权限
+  /disable|enable name1[,name2[...]] func1[,func2[...]] 开启|禁止某人某功能权限
   /start|stop func1[,func2[,func3[...]] 开启|停止功能"""
 
     def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, admin: str = None) -> None:
