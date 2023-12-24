@@ -22,7 +22,7 @@ class Permission(object):
   /disable|enable name1[,name2[,name3[...]]] func1[,func2[,func3[...]] 开启|禁止某人某功能权限
   /start|stop func1[,func2[,func3[...]] 开启|停止功能"""
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, admin: str = None) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration
@@ -31,6 +31,7 @@ class Permission(object):
         self.__wcf = wcf
         self.__config = config
         self.__logger = logger
+        self.__admin = admin if admin else self.__wcf.get_self_wxid()
 
     def __call__(self, msg: wcferry.WxMsg) -> None:
         """
@@ -38,12 +39,13 @@ class Permission(object):
         :param msg: the command message
         """
         if msg.content == "/help":
-            self.__wcf.send_text(self.HELP_DOCS, self.__wcf.get_self_wxid())
+            self.__wcf.send_text(self.HELP_DOCS, self.__admin)
         elif msg.content == "/state":
             funcs = self.__config.config.keys()
             self.__wcf.send_text(
-                "  STATE\n" + "".join((f"- {i}: {'enable' if self.__config[i]['enable'] else 'disable'}\n" for i in funcs)),
-                self.__wcf.get_self_wxid())
+                "  STATE\n" + "".join(
+                    (f"- {i}: {'enable' if self.__config[i]['enable'] else 'disable'}\n" for i in funcs)),
+                self.__admin)
         elif c := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
             command = c.groups()
             mode = command[0]
@@ -56,10 +58,12 @@ class Permission(object):
             funcs = command[1].split(",")
             for f in funcs:
                 if self.__config[f] is None:
-                    self.__logger.info(f"function {f} does not exist")
+                    self.__wcf.send_text(info := f"function {f} does not exist", self.__admin)
+                    self.__logger.info(info)
                     continue
                 self.__config[f]["enable"] = mode == 'start'
-                self.__logger.info(f"{f} has been turned {'on' if mode == 'start' else 'off'}")
+                self.__wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", self.__admin)
+                self.__logger.info(info)
         self.__config.save_config()
 
     def update_access(self, users: list[str], funcs: list[str], mode: str) -> None:
@@ -71,22 +75,27 @@ class Permission(object):
         """
         my_friends = self.__wcf.get_friends()
         if stranger := set(users) - {i['name'] for i in my_friends}:
-            self.__logger.info(f"{stranger} are not your friends, please check the username")
+            self.__wcf.send_text(info := f"{stranger} are not your friends, please check the username", self.__admin)
+            self.__logger.info(info)
         for f in funcs:
             if self.__config[f] is None:
-                self.__logger.info(f"function {f} does not exist")
+                self.__wcf.send_text(info := f"function {f} does not exist", self.__admin)
+                self.__logger.info(info)
                 continue
             for i in my_friends:
                 if i["name"] in users:
                     if mode == "enable":
                         if i["wxid"] not in self.__config[f]["access"]:
                             self.__config[f]["access"].append(i["wxid"])
-                            self.__logger.info(f"The {f} access has been turned on for user [{i['name']}]")
+                            self.__wcf.send_text(info := f"The {f} access has been turned on for user [{i['name']}]", self.__admin)
                         else:
-                            self.__logger.info(f"The user [{i['name']}]'s {f} access already exists")
+                            self.__wcf.send_text(info := f"The user [{i['name']}]'s {f} access already exists", self.__admin)
                     elif mode == "disable":
                         if i["wxid"] in self.__config[f]["access"]:
                             self.__config[f]["access"].remove(i["wxid"])
-                            self.__logger.info(f"The {f} access has been turned off for user [{i['name']}]")
+                            self.__wcf.send_text(info := f"The {f} access has been turned off for user [{i['name']}]", self.__admin)
                         else:
-                            self.__logger.info(f"The user [{i['name']}]'s {f} access no longer exists")
+                            self.__wcf.send_text(info := f"The user [{i['name']}]'s {f} access no longer exists", self.__admin)
+                    else:
+                        continue
+                    self.__logger.info(info)
