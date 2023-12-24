@@ -5,8 +5,6 @@
 # @Software: PyCharm
 import logging
 
-from wcferry import Wcf
-
 from funcs import funcs
 from funcs.AI import Gemini, GPT
 from funcs.Command import Permission
@@ -24,9 +22,15 @@ class SusRobot:
     A WeChat Robot demo
     """
 
-    def __init__(self) -> None:
-        self.sus, self.wcf, self.logger = robot("SUSBOT")
-        self.config: Configuration = Configuration("./config.yaml")
+    def __init__(
+            self,
+            config_path: str = "./config.yaml",
+            name: str = "SUSBOT",
+            debug: bool = True,
+            admin: str = None
+    ) -> None:
+        self.sus, self.wcf, self.logger, self.admin = robot(name=name, debug=debug, admin=admin)
+        self.config: Configuration = Configuration(config_path)
         self.sus.register(
             GPT(self.wcf, self.config, self.logger, "GPT", "/").private_reply, (Content.TEXT,), fromFriend=True
         )
@@ -34,12 +38,12 @@ class SusRobot:
             Gemini(self.wcf, self.config, self.logger, "Gemini", "%").private_reply, (Content.TEXT,), fromFriend=True
         )
         self.sus.register(
-            funcs.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True
+            funcs.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
         )
         self.sus.register(
-            funcs.menu(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True
+            funcs.menu(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
         )
-        self.sus.register_command(Permission(self.wcf, self.config, self.logger))
+        self.sus.register_command(Permission(self.wcf, self.config, self.logger, self.admin), (Content.TEXT,))
 
     def run(self) -> None:
         """
@@ -49,7 +53,7 @@ class SusRobot:
 
 
 def main() -> None:
-    susbot = SusRobot()
+    susbot = SusRobot(debug=True, admin="\u3000\u3000")
     susbot.run()
 
 

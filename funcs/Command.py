@@ -74,16 +74,19 @@ class Permission(object):
         :param funcs: Function name list
         :param mode: enable/disable
         """
-        my_friends: list[dict] = self.__wcf.get_friends()
-        if stranger := set(users) - {i['name'] for i in my_friends}:
+        contacts: list[dict] = self.__wcf.get_friends()
+        contacts.append(self.__wcf.get_info_by_wxid(self.__wcf.get_self_wxid()))
+        if stranger := set(users) - {i['name'] for i in contacts}:
             self.__wcf.send_text(info := f"{stranger} are not your friends, please check the username", self.__admin)
             self.__logger.info(info)
+        if funcs == ['all']:
+            funcs = self.__config.config.keys()
         for f in funcs:
             if self.__config[f] is None:
                 self.__wcf.send_text(info := f"function {f} does not exist", self.__admin)
                 self.__logger.info(info)
                 continue
-            for i in my_friends:
+            for i in contacts:
                 if i["name"] in users:
                     if mode == "enable":
                         if i["wxid"] not in self.__config[f]["access"]:

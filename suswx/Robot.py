@@ -21,15 +21,22 @@ class Robot(object):
     A WeChat robot framework
     """
 
-    def __init__(self, wcf: Wcf, logger: logging.Logger) -> None:
+    def __init__(self, wcf: Wcf, logger: logging.Logger, admin: str = None) -> None:
         """
         :param wcf: your wcf instance
         """
         self.wcf: Wcf = wcf
+        self.admin: str = wcf.get_self_wxid()
+        if admin := list(filter(lambda x: x['name'] == admin, wcf.get_friends())):
+            self.admin = admin[0]['wxid']
         self.registry: dict = {
-            i: ([], []) for i in (0, 1, 3, 37, 47, 1090519089)
-        }  # (私聊, 组群), 0为自己
+            i: ([], []) for i in (1, 3, 37, 47, 1090519089)
+        }  # (私聊, 组群)
+        self.command: dict = {
+            i: [] for i in (1, 3, 37, 47, 1090519089)
+        }
         self.logger: logging.Logger = logger
+        # self.register_command()  # TODO
 
     def run(self) -> None:
         """
@@ -41,8 +48,6 @@ class Robot(object):
             time.sleep(interval)
             try:
                 msg: WxMsg = self.wcf.get_msg()
-                if msg.from_self() and msg.content == "/quit":
-                    break
                 self.process(msg)
             except queue.Empty:
                 continue
@@ -53,13 +58,11 @@ class Robot(object):
         :param msg: WxMsg to process
         """
         from_group: int = int(msg.from_group())
+        from_self: bool = msg.sender == self.admin
         if not from_group and msg.is_text():
-            self.logger.info(
-                "[%s]: %s",
-                self.wcf.get_info_by_wxid(msg.sender)["name"], msg.content,
-            )
-        if msg.from_self():
-            func: list[Callable] = self.registry[0][0]
+            self.logger.info("[%s]: %s", self.wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
+        if from_self:
+            func: list[Callable] = self.command[msg.type]
         elif self.registry.get(msg.type) is not None:
             func: list[Callable] = self.registry[msg.type][from_group]
         else:
@@ -88,17 +91,26 @@ class Robot(object):
             if fromGroup:
                 self.registry[i.value][1].append(func)
 
-    def register_command(self, func: Callable) -> None:
+    def register_command(self, func: Callable, msgType: tuple[Content]) -> None:
         """
         Register a processing method with the robot to process the administrator's command
         :param func: a callable to register
+        :param msgType: the msg type list to register
         """
-        self.registry[0][0].append(func)
+        for i in msgType:
+            self.command[i.value].append(func)
 
 
-def robot(name: str, debug: bool = True) -> tuple[Robot, wcferry.Wcf, logging.Logger]:
-    wcf = wcferry.Wcf(debug=debug)
-    logger = logging.getLogger(name)
-    bot = Robot(wcf, logger)
+def robot(name: str = "SUSBOT", debug: bool = True, admin: str = None) -> tuple[Robot, wcferry.Wcf, logging.Logger, str]:
+    """
+    Get a WeChat bot
+    :param name: the bot's name
+    :param debug: whether to enable debugging
+    :param admin: the administrator's wxid
+    :return: robot instance, wcferry instance, logger instance, admin's wxid
+    """
+    wcf: wcferry.Wcf = wcferry.Wcf(debug=debug)
+    logger: logging.Logger = logging.getLogger(name)
+    bot: Robot = Robot(wcf, logger, admin)
     atexit.register(wcf.cleanup)
-    return bot, wcf, logger
+    return bot, wcf, logger, bot.admin
