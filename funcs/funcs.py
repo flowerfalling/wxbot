@@ -73,5 +73,6 @@ def menu(
                 )
         ):
             wcf.send_text(MENU, msg.sender)
+            logger.info("send menu message")
 
     return process

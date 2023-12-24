@@ -36,7 +36,6 @@ class Robot(object):
             i: [] for i in (1, 3, 37, 47, 1090519089)
         }
         self.logger: logging.Logger = logger
-        # self.register_command()  # TODO
 
     def run(self) -> None:
         """
@@ -62,6 +61,8 @@ class Robot(object):
         if not from_group and msg.is_text():
             self.logger.info("[%s]: %s", self.wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
         if from_self:
+            if msg.content == "/quit":
+                exit(0)
             func: list[Callable] = self.command[msg.type]
         elif self.registry.get(msg.type) is not None:
             func: list[Callable] = self.registry[msg.type][from_group]
@@ -91,7 +92,7 @@ class Robot(object):
             if fromGroup:
                 self.registry[i.value][1].append(func)
 
-    def register_command(self, func: Callable, msgType: tuple[Content]) -> None:
+    def register_command(self, func: Callable[[wcferry.WxMsg], None], msgType: tuple[Content]) -> None:
         """
         Register a processing method with the robot to process the administrator's command
         :param func: a callable to register
@@ -113,4 +114,5 @@ def robot(name: str = "SUSBOT", debug: bool = True, admin: str = None) -> tuple[
     logger: logging.Logger = logging.getLogger(name)
     bot: Robot = Robot(wcf, logger, admin)
     atexit.register(wcf.cleanup)
+    atexit.register(lambda: print("Quit done"))
     return bot, wcf, logger, bot.admin
