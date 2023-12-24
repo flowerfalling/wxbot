@@ -311,6 +311,9 @@ class GPT(_AI):
             self.key: str = "/"
 
         def clear(self):
+            """
+            Clear gpt session history
+            """
             self.pmid = ""
 
         def command(self, order: str) -> str:
