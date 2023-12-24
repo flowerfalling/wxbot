@@ -5,6 +5,7 @@
 # @Software: PyCharm
 import logging
 import re
+import typing
 
 import wcferry
 
@@ -16,7 +17,7 @@ class Permission(object):
     Operate robot functions and control other people’s permissions
     """
 
-    HELP_DOCS = """Permission documentation
+    HELP_DOCS: str = """Permission documentation
   /help 获取帮助
   /state 查看功能状态
   /disable|enable name1[,name2[,name3[...]]] func1[,func2[,func3[...]] 开启|禁止某人某功能权限
@@ -28,10 +29,10 @@ class Permission(object):
         :param config: your configuration
         :param logger: the logger instance
         """
-        self.__wcf = wcf
-        self.__config = config
-        self.__logger = logger
-        self.__admin = admin if admin else self.__wcf.get_self_wxid()
+        self.__wcf: wcferry.Wcf = wcf
+        self.__config: Configuration = config
+        self.__logger: logging.Logger = logger
+        self.__admin: str = admin if admin else self.__wcf.get_self_wxid()
 
     def __call__(self, msg: wcferry.WxMsg) -> None:
         """
@@ -41,21 +42,21 @@ class Permission(object):
         if msg.content == "/help":
             self.__wcf.send_text(self.HELP_DOCS, self.__admin)
         elif msg.content == "/state":
-            funcs = self.__config.config.keys()
+            funcs: typing.Iterable = self.__config.config.keys()
             self.__wcf.send_text(
                 "  STATE\n" + "".join(
                     (f"- {i}: {'enable' if self.__config[i]['enable'] else 'disable'}\n" for i in funcs)),
                 self.__admin)
         elif c := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
-            command = c.groups()
-            mode = command[0]
-            users = command[1].split(",")
-            funcs = command[2].split(",")
+            command: tuple = c.groups()
+            mode: str = command[0]
+            users: list[str] = command[1].split(",")
+            funcs: list[str] = command[2].split(",")
             self.update_access(users, funcs, mode)
         elif c := re.fullmatch("/(start|stop) (.*?)", msg.content):
-            command = c.groups()
-            mode = command[0]
-            funcs = command[1].split(",")
+            command: tuple = c.groups()
+            mode: str = command[0]
+            funcs: list[str] = command[1].split(",")
             for f in funcs:
                 if self.__config[f] is None:
                     self.__wcf.send_text(info := f"function {f} does not exist", self.__admin)
@@ -66,14 +67,14 @@ class Permission(object):
                 self.__logger.info(info)
         self.__config.save_config()
 
-    def update_access(self, users: list[str], funcs: list[str], mode: str) -> None:
+    def update_access(self, users: list[str], funcs: typing.Iterable[str], mode: str) -> None:
         """
         Change user permissions for specific features
         :param users: List of usernames
         :param funcs: Function name list
         :param mode: enable/disable
         """
-        my_friends = self.__wcf.get_friends()
+        my_friends: list[dict] = self.__wcf.get_friends()
         if stranger := set(users) - {i['name'] for i in my_friends}:
             self.__wcf.send_text(info := f"{stranger} are not your friends, please check the username", self.__admin)
             self.__logger.info(info)

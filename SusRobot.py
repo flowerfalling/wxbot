@@ -10,7 +10,7 @@ from wcferry import Wcf
 from funcs import funcs
 from funcs.AI import Gemini, GPT
 from funcs.Command import Permission
-from suswx import Robot, Content, Configuration
+from suswx import robot, Content, Configuration
 
 logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -25,15 +25,13 @@ class SusRobot:
     """
 
     def __init__(self) -> None:
-        self.logger: logging.Logger = logging.getLogger("SUSBOT")
-        self.wcf: Wcf = Wcf(debug=True)
-        self.sus: Robot = Robot(self.wcf, self.logger)
+        self.sus, self.wcf, self.logger = robot("SUSBOT")
         self.config: Configuration = Configuration("./config.yaml")
         self.sus.register(
-            GPT(self.wcf, self.config, self.logger).private_reply, (Content.TEXT,), fromFriend=True
+            GPT(self.wcf, self.config, self.logger, "GPT", "/").private_reply, (Content.TEXT,), fromFriend=True
         )
         self.sus.register(
-            Gemini(self.wcf, self.config, self.logger).private_reply, (Content.TEXT,), fromFriend=True
+            Gemini(self.wcf, self.config, self.logger, "Gemini", "%").private_reply, (Content.TEXT,), fromFriend=True
         )
         self.sus.register(
             funcs.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT.TEXT,), fromFriend=True

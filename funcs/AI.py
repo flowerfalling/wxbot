@@ -17,7 +17,7 @@ import wcferry
 
 from suswx import Configuration
 
-_T = TypeVar('_T')
+_T: type = TypeVar('_T')
 
 
 class _AI(ABC):
@@ -25,18 +25,20 @@ class _AI(ABC):
     An AI that can be used for WeChat interaction
     """
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, name: str, key: str) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration of the AI
         :param logger: the logger instance
+        :param name: AI's name
+        :param key: AI's identification symbol
         """
         self._wcf: wcferry.Wcf = wcf
         self._config: Configuration = config
         self.__info: dict[str, Any] = {}
         self._logger: logging.Logger = logger
-        self.name: str = "AI"
-        self.key: str = ""
+        self.name: str = name
+        self.key: str = key
 
     @abstractmethod
     def private_reply(self, msg: wcferry.WxMsg) -> None:
@@ -53,7 +55,7 @@ class _AI(ABC):
     ) -> None:
         sender: str = msg.sender
         ai_name, ai_key = self.name, self.key
-        config = self._config[ai_name.lower()]
+        config: dict = self._config[ai_name.lower()]
         if sender not in config["access"] or not config["enable"]:
             return
         user_info: _T = self.__info.setdefault(sender, get_default_info())
@@ -83,11 +85,11 @@ class _AI(ABC):
         Used to record AI's records of each session and answer user's command
         """
 
-        def __init__(self) -> None:
+        def __init__(self, name: str, key: str) -> None:
             self.__waiting: bool = False
             self.__state: bool = False
-            self.name: str = "AI"
-            self.key: str = ""
+            self.name: str = name
+            self.key: str = key
 
         @property
         def waiting(self) -> bool:
@@ -152,15 +154,13 @@ class Gemini(_AI):
     A Gemini that can be used for WeChat interaction
     """
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, name: str, key: str) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration of Gemini
         :param logger: the logger instance
         """
-        super().__init__(wcf, config, logger)
-        self.name = "Gemini"
-        self.key = "%"
+        super().__init__(wcf, config, logger, name, key)
         genai.configure(api_key=config["gemini"]['token'])
         self.__model: genai.GenerativeModel = genai.GenerativeModel('gemini-pro')
 
@@ -171,26 +171,23 @@ class Gemini(_AI):
         """
         self._reply(
             msg=msg,
-            get_default_info=lambda: Gemini._GeminiInfo(self.__model),
+            get_default_info=lambda: Gemini._GeminiInfo(self.__model, self.name, self.key),
         )
 
     def _get_ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
+        resp: str = "something wents wrong"
         try:
             response: genai.types.GenerateContentResponse = user_info.chat.send_message(
                 content=content[int(not user_info.state):])
             self._wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
-            self._logger.info(resp)
         except google.api_core.exceptions.GoogleAPIError:
             self._wcf.send_text(resp := "Sorry, Gemini's answer timed out", sender)
-            self._logger.info(resp)
-        except google.generativeai.types.BlockedPromptException as e:
-            self._wcf.send_text(resp := "Sorry, your prompt has been blocked", sender)
-            self._logger.info(resp)
+        except (google.generativeai.types.BlockedPromptException,
+                google.generativeai.types.generation_types.StopCandidateException) as e:
+            self._wcf.send_text(resp := "Sorry, an exception occurs because of your prompt", sender)
             self._logger.info(e)
-        except google.generativeai.types.generation_types.StopCandidateException as e:
-            self._wcf.send_text(resp := "Sorry, An exception occurs at the candidate", sender)
+        finally:
             self._logger.info(resp)
-            self._logger.info(e)
 
     class _GeminiInfo(_AI.AIInfo):
         """
@@ -204,11 +201,9 @@ class Gemini(_AI):
   %gemini end 关闭Gemini连续对话
   %gemini clear 清空当前会话"""
 
-        def __init__(self, model: genai.GenerativeModel) -> None:
-            super().__init__()
+        def __init__(self, model: genai.GenerativeModel, name: str, key: str) -> None:
+            super().__init__(name, key)
             self.chat: genai.ChatSession = model.start_chat(history=[])
-            self.name = "Gemini"
-            self.key = "%"
 
         def command(self, order: str) -> str:
             return self._process_command(
@@ -239,20 +234,18 @@ class GPT(_AI):
         "Accept-Language": "zh-CN,zh;q=0.9",
     }
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger) -> None:
+    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, name: str, key: str) -> None:
         """
         :param wcf: your wcf instance
         :param config: your configuration of Gemini
         :param logger: the logger instance
         """
-        super().__init__(wcf, config, logger)
-        self.name: str = "GPT"
-        self.key: str = "/"
+        super().__init__(wcf, config, logger, name, key)
 
     def private_reply(self, msg: wcferry.WxMsg) -> None:
         self._reply(
             msg=msg,
-            get_default_info=GPT._GPTInfo
+            get_default_info=lambda: GPT._GPTInfo(self.name, self.key)
         )
 
     def _get_ai_response(self, content: str, sender: str, user_info: "_T") -> None:
@@ -302,8 +295,8 @@ class GPT(_AI):
   /gpt end 关闭gpt连续对话
   /gpt clear 清空当前会话"""
 
-        def __init__(self):
-            super().__init__()
+        def __init__(self, name: str, key: str):
+            super().__init__(name, key)
             self.__top_p: float = 1.0
             self.__temperature: float = 0.8
             self.pmid: str = ""

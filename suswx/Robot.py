@@ -30,7 +30,6 @@ class Robot(object):
             i: ([], []) for i in (0, 1, 3, 37, 47, 1090519089)
         }  # (私聊, 组群), 0为自己
         self.logger: logging.Logger = logger
-        atexit.register(Robot.quit, self.wcf)
 
     def run(self) -> None:
         """
@@ -96,10 +95,10 @@ class Robot(object):
         """
         self.registry[0][0].append(func)
 
-    @staticmethod
-    def quit(wcf: wcferry.Wcf) -> None:
-        """
-        Release wcf when program exits in order to exit normally
-        """
-        wcf.cleanup()
-        print("Quit done")
+
+def robot(name: str, debug: bool = True) -> tuple[Robot, wcferry.Wcf, logging.Logger]:
+    wcf = wcferry.Wcf(debug=debug)
+    logger = logging.getLogger(name)
+    bot = Robot(wcf, logger)
+    atexit.register(wcf.cleanup)
+    return bot, wcf, logger

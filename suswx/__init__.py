@@ -6,4 +6,4 @@
 
 from suswx.Configuration import Configuration
 from suswx.Content import Content
-from suswx.Robot import Robot
+from suswx.Robot import robot
