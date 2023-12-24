@@ -3,7 +3,9 @@
 # @Author  : 之落花--falling_flowers
 # @File    : __init__.py.py
 # @Software: PyCharm
-
+#
 from suswx.Configuration import Configuration
 from suswx.Content import Content
-from suswx.Robot import robot
+from suswx.Robot import robot, wcf
+
+__all__ = ["robot", "wcf", "Configuration", "Content"]

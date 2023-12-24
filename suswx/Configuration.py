@@ -5,6 +5,8 @@
 # @Software: PyCharm
 import yaml
 
+__all__ = ["Configuration"]
+
 
 class Configuration(object):
     """

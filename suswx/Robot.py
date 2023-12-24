@@ -15,16 +15,17 @@ from wcferry import Wcf, WxMsg
 
 from suswx import Content
 
+__all__ = ["robot", "wcf"]
+
+wcf: Wcf = wcferry.Wcf()
+
 
 class Robot(object):
     """
     A WeChat robot framework
     """
 
-    def __init__(self, wcf: Wcf, logger: logging.Logger, admin: str = None) -> None:
-        """
-        :param wcf: your wcf instance
-        """
+    def __init__(self, logger: logging.Logger, admin: str = None) -> None:
         self.wcf: Wcf = wcf
         self.admin: str = wcf.get_self_wxid()
         if admin := list(filter(lambda x: x['name'] == admin, wcf.get_friends())):

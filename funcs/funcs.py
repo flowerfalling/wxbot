@@ -11,6 +11,8 @@ import wcferry
 
 from suswx import Configuration
 
+__all__ = ["hitokoto", "menu"]
+
 
 def hitokoto(
         wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger

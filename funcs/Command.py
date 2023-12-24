@@ -11,6 +11,8 @@ import wcferry
 
 from suswx import Configuration
 
+__all__ = ["Administrator"]
+
 
 class Administrator(object):
     """
@@ -44,8 +46,9 @@ class Administrator(object):
         elif msg.content == "/state":
             funcs: typing.Iterable = self.__config.config.keys()
             self.__wcf.send_text(
-                "  STATE\n" + "".join(
-                    (f"- {i}: {'enable' if self.__config[i]['enable'] else 'disable'}\n" for i in funcs)),
+                "  STATE" + "".join(
+                    (f"\n- {i}: {'enable' if self.__config[i]['enable'] else 'disable'}" for i in funcs)
+                ),
                 self.__admin)
         elif c := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
             command: tuple = c.groups()

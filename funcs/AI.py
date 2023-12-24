@@ -19,8 +19,10 @@ from suswx import Configuration
 
 _T: type = TypeVar('_T')
 
+__all__ = ["Gemini", "GPT"]
 
-class _AI(ABC):
+
+class AI(ABC):
     """
     An AI that can be used for WeChat interaction
     """
@@ -149,7 +151,7 @@ class _AI(ABC):
                     return f'指令错误,可发送"{self.key}{self.name.lower()} help"获取帮助'
 
 
-class Gemini(_AI):
+class Gemini(AI):
     """
     A Gemini that can be used for WeChat interaction
     """
@@ -189,7 +191,7 @@ class Gemini(_AI):
         finally:
             self._logger.info(resp)
 
-    class _GeminiInfo(_AI.AIInfo):
+    class _GeminiInfo(AI.AIInfo):
         """
         Used to record Gemini's records of each session and answer user's command
         """
@@ -213,7 +215,7 @@ class Gemini(_AI):
             )
 
 
-class GPT(_AI):
+class GPT(AI):
     """
     A GPT that can be used for WeChat interaction
     """
@@ -283,7 +285,7 @@ class GPT(_AI):
         except requests.exceptions.RequestException:
             return None
 
-    class _GPTInfo(_AI.AIInfo):
+    class _GPTInfo(AI.AIInfo):
         """
         Used to record GPT's records of each session and answer user's command
         """

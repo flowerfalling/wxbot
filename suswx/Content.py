@@ -5,6 +5,8 @@
 # @Software: PyCharm
 from enum import Enum
 
+__all__ = ["Content"]
+
 
 class Content(Enum):
     """
