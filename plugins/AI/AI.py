@@ -15,7 +15,7 @@ import google.generativeai as genai
 import requests
 import wcferry
 
-from suswx import Configuration
+import Configuration
 
 _T: type = TypeVar('_T')
 

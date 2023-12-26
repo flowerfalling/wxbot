@@ -4,8 +4,7 @@
 # @File    : __init__.py.py
 # @Software: PyCharm
 #
-from suswx.Configuration import Configuration
 from suswx.Content import Content
-from suswx.Robot import robot, wcf
+from suswx.Robot import robot, wcf, logger
 
-__all__ = ["robot", "wcf", "Configuration", "Content"]
+__all__ = ["robot", "wcf", "logger", "Content"]

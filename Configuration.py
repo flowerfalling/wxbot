@@ -5,7 +5,7 @@
 # @Software: PyCharm
 import yaml
 
-__all__ = ["Configuration"]
+__all__ = ["config"]
 
 
 class Configuration(object):
@@ -42,4 +42,7 @@ class Configuration(object):
         if item in self.config:
             return self.config[item]
         raise None
+
+
+config = Configuration()
 

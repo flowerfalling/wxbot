@@ -5,10 +5,8 @@
 # @Software: PyCharm
 import logging
 
-from funcs import funcs
-from funcs.AI import Gemini, GPT
-from funcs.Command import Administrator
-from suswx import robot, Content, Configuration
+from plugins import funcs
+from suswx import robot, Content
 
 logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -24,26 +22,26 @@ class SusRobot:
 
     def __init__(
             self,
-            config_path: str = "./config.yaml",
             name: str = "SUSBOT",
-            debug: bool = True,
             admin: str = None
     ) -> None:
-        self.sus, self.wcf, self.logger, self.admin = robot(name=name, debug=debug, admin=admin)
-        self.config: Configuration = Configuration(config_path)
-        self.sus.register(
-            GPT(self.wcf, self.config, self.logger, "GPT", "/").private_reply, (Content.TEXT,), fromFriend=True
-        )
-        self.sus.register(
-            Gemini(self.wcf, self.config, self.logger, "Gemini", "%").private_reply, (Content.TEXT,), fromFriend=True
-        )
-        self.sus.register(
-            funcs.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
-        )
-        self.sus.register(
-            funcs.menu(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
-        )
-        self.sus.register_command(Administrator(self.wcf, self.config, self.logger, self.admin), (Content.TEXT,))
+        self.sus = robot(name=name, admin=admin)
+        # self.sus.register(
+        #     GPT(self.wcf, self.config, self.logger, "GPT", "/").private_reply, (Content.TEXT,), fromFriend=True
+        # )
+        # self.sus.register(
+        #     Gemini(self.wcf, self.config, self.logger, "Gemini", "%").private_reply, (Content.TEXT,), fromFriend=True
+        # )
+        # self.sus.register(
+        #     plugins.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
+        # )
+        # self.sus.register(
+        #     plugins.menu(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
+        # )
+        # self.sus.register_command(Administrator(self.wcf, self.config, self.logger, self.admin), (Content.TEXT,))
+        self.sus.register_((Content.TEXT,), True)(funcs.funcs.hitokoto)
+        self.sus.register_((Content.TEXT,), True)(funcs.funcs.menu)
+        # self.sus.register_((Content.TEXT,), True)(AI.AI.GPT().private_reply)
 
     def run(self) -> None:
         """
@@ -53,7 +51,7 @@ class SusRobot:
 
 
 def main() -> None:
-    susbot = SusRobot(debug=True, admin="\u3000\u3000")
+    susbot = SusRobot(admin="\u3000\u3000")
     susbot.run()
 
 

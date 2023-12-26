@@ -9,7 +9,7 @@ import typing
 
 import wcferry
 
-from suswx import Configuration
+import Configuration
 
 __all__ = ["Administrator"]
 

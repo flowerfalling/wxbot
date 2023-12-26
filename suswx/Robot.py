@@ -15,9 +15,16 @@ from wcferry import Wcf, WxMsg
 
 from suswx import Content
 
-__all__ = ["robot", "wcf"]
+__all__ = ["robot", "wcf", "logger"]
 
 wcf: Wcf = wcferry.Wcf()
+logger: logging.Logger = logging.getLogger()
+func_registry: dict = {
+    i: ([], []) for i in (1, 3, 37, 47, 1090519089)
+}
+command_registry: dict = {
+    i: [] for i in (1, 3, 37, 47, 1090519089)
+}
 
 
 class Robot(object):
@@ -25,12 +32,12 @@ class Robot(object):
     A WeChat robot framework
     """
 
-    def __init__(self, logger: logging.Logger, admin: str = None) -> None:
+    def __init__(self, admin: str = None) -> None:
         self.wcf: Wcf = wcf
         self.admin: str = wcf.get_self_wxid()
         if admin := list(filter(lambda x: x['name'] == admin, wcf.get_friends())):
             self.admin = admin[0]['wxid']
-        self.registry: dict = {
+        self._registry: dict = {
             i: ([], []) for i in (1, 3, 37, 47, 1090519089)
         }  # (私聊, 组群)
         self.command: dict = {
@@ -65,13 +72,27 @@ class Robot(object):
             if msg.content == "/quit":
                 exit(0)
             func: list[Callable] = self.command[msg.type]
-        elif self.registry.get(msg.type) is not None:
-            func: list[Callable] = self.registry[msg.type][from_group]
+        elif self._registry.get(msg.type) is not None:
+            func: list[Callable] = self._registry[msg.type][from_group]
         else:
             return
         if func:
             for i in func:
                 Thread(target=i, args=(msg,)).start()
+
+    def register_(
+            self,
+            msgType: tuple[Content],
+            fromFriend: bool = False,
+            fromGroup: bool = False,
+    ) -> Callable[[Callable[[WxMsg], None]], None]:
+        def inner(func: Callable) -> None:
+            for i in msgType:
+                if fromFriend:
+                    self._registry[i.value][0].append(func)
+                if fromGroup:
+                    self._registry[i.value][1].append(func)
+        return inner
 
     def register(
             self,
@@ -89,9 +110,9 @@ class Robot(object):
         """
         for i in msgType:
             if fromFriend:
-                self.registry[i.value][0].append(func)
+                self._registry[i.value][0].append(func)
             if fromGroup:
-                self.registry[i.value][1].append(func)
+                self._registry[i.value][1].append(func)
 
     def register_command(self, func: Callable[[wcferry.WxMsg], None], msgType: tuple[Content]) -> None:
         """
@@ -103,17 +124,15 @@ class Robot(object):
             self.command[i.value].append(func)
 
 
-def robot(name: str = "SUSBOT", debug: bool = True, admin: str = None) -> tuple[Robot, wcferry.Wcf, logging.Logger, str]:
+def robot(name: str = "SUSBOT", admin: str = None) -> Robot:
     """
     Get a WeChat bot
     :param name: the bot's name
-    :param debug: whether to enable debugging
     :param admin: the administrator's wxid
     :return: robot instance, wcferry instance, logger instance, admin's wxid
     """
-    wcf: wcferry.Wcf = wcferry.Wcf(debug=debug)
-    logger: logging.Logger = logging.getLogger(name)
-    bot: Robot = Robot(wcf, logger, admin)
+    logger.name = name
+    bot: Robot = Robot(admin)
     atexit.register(wcf.cleanup)
     atexit.register(lambda: print("Quit done"))
-    return bot, wcf, logger, bot.admin
+    return bot
