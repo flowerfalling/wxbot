@@ -7,29 +7,11 @@ import requests
 import wcferry
 
 import suswx
+from suswx import Content
 from Configuration import config
 
-__all__ = ["hitokoto", "menu"]
 
-
-MENU = '''- /gpt help
-- %gemini help
-- @一言
-- @菜单'''
-
-
-def menu(msg: wcferry.WxMsg) -> None:
-    if all(
-            (
-                    msg.sender in config["plugins"]["menu"]["access"],
-                    config["plugins"]["menu"]["enable"],
-                    msg.content == "@菜单",
-            )
-    ):
-        suswx.wcf.send_text(MENU, msg.sender)
-        suswx.logger.info("send menu message")
-
-
+@suswx.register_func((Content.TEXT,), True)
 def hitokoto(msg: wcferry.WxMsg) -> None:
     if all(
             (

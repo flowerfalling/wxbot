@@ -3,9 +3,4 @@
 # @Author  : 之落花--falling_flowers
 # @File    : __init__.py.py
 # @Software: PyCharm
-from plugins.funcs import funcs
-
-print("load plugins.funcs.__init__")
-
-
-__all__ = ["funcs"]
+__all__ = ["menu", "hitokoto"]

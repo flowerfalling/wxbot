@@ -5,8 +5,9 @@
 # @Software: PyCharm
 import logging
 
-from plugins import funcs
-from suswx import robot, Content
+from Configuration import config
+from suswx import robot
+import plugins
 
 logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -20,28 +21,9 @@ class SusRobot:
     A WeChat Robot demo
     """
 
-    def __init__(
-            self,
-            name: str = "SUSBOT",
-            admin: str = None
-    ) -> None:
-        self.sus = robot(name=name, admin=admin)
-        # self.sus.register(
-        #     GPT(self.wcf, self.config, self.logger, "GPT", "/").private_reply, (Content.TEXT,), fromFriend=True
-        # )
-        # self.sus.register(
-        #     Gemini(self.wcf, self.config, self.logger, "Gemini", "%").private_reply, (Content.TEXT,), fromFriend=True
-        # )
-        # self.sus.register(
-        #     plugins.hitokoto(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
-        # )
-        # self.sus.register(
-        #     plugins.menu(self.wcf, self.config, self.logger), (Content.TEXT,), fromFriend=True
-        # )
-        # self.sus.register_command(Administrator(self.wcf, self.config, self.logger, self.admin), (Content.TEXT,))
-        self.sus.register_((Content.TEXT,), True)(funcs.funcs.hitokoto)
-        self.sus.register_((Content.TEXT,), True)(funcs.funcs.menu)
-        # self.sus.register_((Content.TEXT,), True)(AI.AI.GPT().private_reply)
+    def __init__(self, admin: str = None) -> None:
+        self.config = config
+        self.sus = robot(name=self.config["logger"]["name"], admin=admin)
 
     def run(self) -> None:
         """

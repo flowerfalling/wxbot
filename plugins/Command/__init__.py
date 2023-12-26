@@ -4,9 +4,3 @@
 # @File    : __init__.py.py
 # @Software: PyCharm
 
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

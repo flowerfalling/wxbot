@@ -15,16 +15,38 @@ from wcferry import Wcf, WxMsg
 
 from suswx import Content
 
-__all__ = ["robot", "wcf", "logger"]
+__all__ = ["robot", "wcf", "logger", "register_func", "register_command"]
 
 wcf: Wcf = wcferry.Wcf()
 logger: logging.Logger = logging.getLogger()
-func_registry: dict = {
-    i: ([], []) for i in (1, 3, 37, 47, 1090519089)
-}
-command_registry: dict = {
-    i: [] for i in (1, 3, 37, 47, 1090519089)
-}
+msgtype: tuple[int, ...] = (1, 3, 37, 47, 1090519089)
+func_registry: dict[int, tuple[set, set]] = {i: (set(), set()) for i in msgtype}
+command_registry: dict[int, set] = {i: set() for i in msgtype}
+
+
+def register_func(
+        msgType: tuple[Content],
+        fromFriend: bool = False,
+        fromGroup: bool = False,
+) -> Callable[[Callable[[WxMsg], None]], None]:
+    def inner(func: Callable) -> None:
+        for i in msgType:
+            if fromFriend:
+                func_registry[i.value][0].add(func)
+            if fromGroup:
+                func_registry[i.value][1].add(func)
+
+    return inner
+
+
+def register_command(
+        msgType: tuple[Content],
+) -> Callable[[Callable[[WxMsg], None]], None]:
+    def inner(func: Callable[[WxMsg], None]) -> None:
+        for i in msgType:
+            command_registry[i.value].add(func)
+
+    return inner
 
 
 class Robot(object):
@@ -37,12 +59,8 @@ class Robot(object):
         self.admin: str = wcf.get_self_wxid()
         if admin := list(filter(lambda x: x['name'] == admin, wcf.get_friends())):
             self.admin = admin[0]['wxid']
-        self._registry: dict = {
-            i: ([], []) for i in (1, 3, 37, 47, 1090519089)
-        }  # (私聊, 组群)
-        self.command: dict = {
-            i: [] for i in (1, 3, 37, 47, 1090519089)
-        }
+        self._registry: dict[int, tuple[set, set]] = func_registry
+        self.command: dict[int, set] = command_registry
         self.logger: logging.Logger = logger
 
     def run(self) -> None:
@@ -71,57 +89,14 @@ class Robot(object):
         if from_self:
             if msg.content == "/quit":
                 exit(0)
-            func: list[Callable] = self.command[msg.type]
+            func: set[Callable] = self.command[msg.type]
         elif self._registry.get(msg.type) is not None:
-            func: list[Callable] = self._registry[msg.type][from_group]
+            func: set[Callable] = self._registry[msg.type][from_group]
         else:
             return
         if func:
             for i in func:
                 Thread(target=i, args=(msg,)).start()
-
-    def register_(
-            self,
-            msgType: tuple[Content],
-            fromFriend: bool = False,
-            fromGroup: bool = False,
-    ) -> Callable[[Callable[[WxMsg], None]], None]:
-        def inner(func: Callable) -> None:
-            for i in msgType:
-                if fromFriend:
-                    self._registry[i.value][0].append(func)
-                if fromGroup:
-                    self._registry[i.value][1].append(func)
-        return inner
-
-    def register(
-            self,
-            func: Callable[[WxMsg], None],
-            msgType: tuple[Content],
-            fromGroup: bool = False,
-            fromFriend: bool = False,
-    ) -> None:
-        """
-        Register a processing method with the robot to process other's messages
-        :param func: a callable to register
-        :param msgType: the msg type list to process
-        :param fromGroup: allow to process group messages
-        :param fromFriend: allow to process friend messages
-        """
-        for i in msgType:
-            if fromFriend:
-                self._registry[i.value][0].append(func)
-            if fromGroup:
-                self._registry[i.value][1].append(func)
-
-    def register_command(self, func: Callable[[wcferry.WxMsg], None], msgType: tuple[Content]) -> None:
-        """
-        Register a processing method with the robot to process the administrator's command
-        :param func: a callable to register
-        :param msgType: the msg type list to register
-        """
-        for i in msgType:
-            self.command[i.value].append(func)
 
 
 def robot(name: str = "SUSBOT", admin: str = None) -> Robot:

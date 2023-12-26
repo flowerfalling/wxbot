@@ -5,6 +5,13 @@
 # @Software: PyCharm
 #
 from suswx.Content import Content
-from suswx.Robot import robot, wcf, logger
+from suswx.Robot import robot, wcf, logger, register_func, register_command
 
-__all__ = ["robot", "wcf", "logger", "Content"]
+__all__ = [
+    "robot",
+    "logger",
+    "Content",
+    "wcf",
+    "register_func",
+    "register_command",
+]
