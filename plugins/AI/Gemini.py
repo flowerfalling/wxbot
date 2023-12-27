@@ -35,15 +35,15 @@ class Gemini(AI):
         try:
             response: genai.types.GenerateContentResponse = user_info.chat.send_message(
                 content=content[int(not user_info.state):])
-            suswx.wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
+            wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
         except google.api_core.exceptions.GoogleAPIError:
-            suswx.wcf.send_text(resp := "Sorry, Gemini's answer timed out", sender)
+            wcf.send_text(resp := "Sorry, Gemini's answer timed out", sender)
         except (google.generativeai.types.BlockedPromptException,
                 google.generativeai.types.generation_types.StopCandidateException) as e:
-            suswx.wcf.send_text(resp := "Sorry, an exception occurs because of your prompt", sender)
-            suswx.logger.info(e)
+            wcf.send_text(resp := "Sorry, an exception occurs because of your prompt", sender)
+            logger.info(e)
         finally:
-            suswx.logger.info(resp)
+            logger.info(resp)
 
     class _GeminiInfo(AI.AIInfo):
         """
