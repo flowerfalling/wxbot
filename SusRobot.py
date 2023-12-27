@@ -24,6 +24,7 @@ class SusRobot:
     def __init__(self, admin: str = None) -> None:
         self.config = config
         self.sus = robot(name=self.config["logger"]["name"], admin=admin)
+        plugins.load()
 
     def run(self) -> None:
         """
