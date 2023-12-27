@@ -3,23 +3,19 @@
 # @Author  : 之落花--falling_flowers
 # @File    : AI.py
 # @Software: PyCharm
-import json
-import logging
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 from typing import TypeVar
 
-import google.api_core.exceptions
-import google.generativeai as genai
-import requests
 import wcferry
 
-import Configuration
+from Configuration import config
+from suswx import wcf
 
-_T: type = TypeVar('_T')
+T: type = TypeVar('T', bound="AI.AIInfo")
 
-__all__ = ["Gemini", "GPT"]
+__all__ = ["AI", "Gemini", "GPT"]
 
 
 class AI(ABC):
@@ -27,18 +23,12 @@ class AI(ABC):
     An AI that can be used for WeChat interaction
     """
 
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, name: str, key: str) -> None:
+    def __init__(self, name: str, key: str) -> None:
         """
-        :param wcf: your wcf instance
-        :param config: your configuration of the AI
-        :param logger: the logger instance
         :param name: AI's name
         :param key: AI's identification symbol
         """
-        self._wcf: wcferry.Wcf = wcf
-        self._config: Configuration = config
         self.__info: dict[str, Any] = {}
-        self._logger: logging.Logger = logger
         self.name: str = name
         self.key: str = key
 
@@ -53,28 +43,28 @@ class AI(ABC):
     def _reply(
             self,
             msg: wcferry.WxMsg,
-            get_default_info: Callable[[], _T],
+            get_default_info: Callable[[], T],
     ) -> None:
         sender: str = msg.sender
         ai_name, ai_key = self.name, self.key
-        config: dict = self._config[ai_name.lower()]
-        if sender not in config["access"] or not config["enable"]:
+        config_ai: dict = config["plugins"]["info"][ai_name.lower()]
+        if sender not in config_ai["access"] or not config_ai["enable"]:
             return
-        user_info: _T = self.__info.setdefault(sender, get_default_info())
+        user_info: T = self.__info.setdefault(sender, get_default_info())
         content: str = msg.content
         if content.startswith(ai_key + ai_name.lower()):
-            self._wcf.send_text(user_info.command(content.split(" ")[-1]), sender)
+            wcf.send_text(user_info.command(content.split(" ")[-1]), sender)
             return
         if user_info.state or content.startswith(ai_key):
             if user_info.waiting:
                 while user_info.waiting:
                     time.sleep(0.5)
             user_info.wait()
-            self._get_ai_response(content, sender, user_info)
+            self._ai_response(content, sender, user_info)
             user_info.wake()
 
     @abstractmethod
-    def _get_ai_response(self, content: str, sender: str, user_info: "_T") -> None:
+    def _ai_response(self, content: str, sender: str, user_info: "T") -> None:
         """
         Function to get AI's reply
         :param content: Message content
@@ -150,71 +140,65 @@ class AI(ABC):
                 case _:
                     return f'指令错误,可发送"{self.key}{self.name.lower()} help"获取帮助'
 
-
-class Gemini(AI):
-    """
-    A Gemini that can be used for WeChat interaction
-    """
-
-    def __init__(self, wcf: wcferry.Wcf, config: Configuration, logger: logging.Logger, name: str, key: str) -> None:
-        """
-        :param wcf: your wcf instance
-        :param config: your configuration of Gemini
-        :param logger: the logger instance
-        """
-        super().__init__(wcf, config, logger, name, key)
-        genai.configure(api_key=config["gemini"]['token'])
-        self.__model: genai.GenerativeModel = genai.GenerativeModel('gemini-pro')
-
-    def private_reply(self, msg: wcferry.WxMsg) -> None:
-        """
-        Methods for answering WeChat private messages by Gemini
-        :param msg: Pending friend's message
-        """
-        self._reply(
-            msg=msg,
-            get_default_info=lambda: Gemini._GeminiInfo(self.__model, self.name, self.key),
-        )
-
-    def _get_ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
-        resp: str = "something wents wrong"
-        try:
-            response: genai.types.GenerateContentResponse = user_info.chat.send_message(
-                content=content[int(not user_info.state):])
-            self._wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
-        except google.api_core.exceptions.GoogleAPIError:
-            self._wcf.send_text(resp := "Sorry, Gemini's answer timed out", sender)
-        except (google.generativeai.types.BlockedPromptException,
-                google.generativeai.types.generation_types.StopCandidateException) as e:
-            self._wcf.send_text(resp := "Sorry, an exception occurs because of your prompt", sender)
-            self._logger.info(e)
-        finally:
-            self._logger.info(resp)
-
-    class _GeminiInfo(AI.AIInfo):
-        """
-        Used to record Gemini's records of each session and answer user's command
-        """
-
-        __Gemini_HELP: str = """Gemini command:
-  %xxx 与Gemini对话
-  %gemini help 获取帮助
-  %gemini start 开启Gemini连续对话
-  %gemini end 关闭Gemini连续对话
-  %gemini clear 清空当前会话"""
-
-        def __init__(self, model: genai.GenerativeModel, name: str, key: str) -> None:
-            super().__init__(name, key)
-            self.chat: genai.ChatSession = model.start_chat(history=[])
-
-        def command(self, order: str) -> str:
-            return self._process_command(
-                order=order,
-                clear_func=self.chat.history.clear,
-                help_docs=self.__Gemini_HELP
-            )
-
-
+# class Gemini(AI):
+#     """
+#     A Gemini that can be used for WeChat interaction
+#     """
+#
+#     def __init__(self) -> None:
+#         super().__init__("GPT", "/")
+#         genai.configure(api_key=config["gemini"]['token'])
+#         self.__model: genai.GenerativeModel = genai.GenerativeModel('gemini-pro')
+#
+#     def private_reply(self, msg: wcferry.WxMsg) -> None:
+#         """
+#         Methods for answering WeChat private messages by Gemini
+#         :param msg: Pending friend's message
+#         """
+#         self._reply(
+#             msg=msg,
+#             get_default_info=lambda: Gemini._GeminiInfo(self.__model, self.name, self.key),
+#         )
+#
+#     def ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
+#         resp: str = "something wents wrong"
+#         try:
+#             response: genai.types.GenerateContentResponse = user_info.chat.send_message(
+#                 content=content[int(not user_info.state):])
+#             wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
+#         except google.api_core.exceptions.GoogleAPIError:
+#             wcf.send_text(resp := "Sorry, Gemini's answer timed out", sender)
+#         except (google.generativeai.types.BlockedPromptException,
+#                 google.generativeai.types.generation_types.StopCandidateException) as e:
+#             wcf.send_text(resp := "Sorry, an exception occurs because of your prompt", sender)
+#             logger.info(e)
+#         finally:
+#             logger.info(resp)
+#
+#     class _GeminiInfo(AI.AIInfo):
+#         """
+#         Used to record Gemini's records of each session and answer user's command
+#         """
+#
+#         __Gemini_HELP: str = """Gemini command:
+#   %xxx 与Gemini对话
+#   %gemini help 获取帮助
+#   %gemini start 开启Gemini连续对话
+#   %gemini end 关闭Gemini连续对话
+#   %gemini clear 清空当前会话"""
+#
+#         def __init__(self, model: genai.GenerativeModel, name: str, key: str) -> None:
+#             super().__init__(name, key)
+#             self.chat: genai.ChatSession = model.start_chat(history=[])
+#
+#         def command(self, order: str) -> str:
+#             return self._process_command(
+#                 order=order,
+#                 clear_func=self.chat.history.clear,
+#                 help_docs=self.__Gemini_HELP
+#             )
+#
+#
 class GPT(AI):
     """
     A GPT that can be used for WeChat interaction
@@ -250,7 +234,7 @@ class GPT(AI):
             get_default_info=lambda: GPT._GPTInfo(self.name, self.key)
         )
 
-    def _get_ai_response(self, content: str, sender: str, user_info: "_T") -> None:
+    def ai_response(self, content: str, sender: str, user_info: "T") -> None:
         if response := self.__get_reply(content[int(not user_info.state):], user_info):
             user_info.pmid = response["id"]
             self._wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
@@ -259,7 +243,7 @@ class GPT(AI):
             self._wcf.send_text(resp := "Sorry, GPT's answer timed out", sender)
             self._logger.info(resp)
 
-    def __get_reply(self, msg: str, info: "GPT._GPTInfo") -> dict | None:
+    def __get_reply(self, msg: str, info: "GPT._GPTInfo") -> Optional[dict]:
         """
         Get GPT answer
         :param msg: content of message
