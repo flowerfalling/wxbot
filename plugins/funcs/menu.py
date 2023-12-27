@@ -5,9 +5,8 @@
 # @Software: PyCharm
 import wcferry
 
-import suswx
 from Configuration import config
-from suswx import Content
+from suswx import register_func, wcf, logger, Content
 
 MENU = '''- /gpt help
 - %gemini help
@@ -15,14 +14,14 @@ MENU = '''- /gpt help
 - @菜单'''
 
 
-@suswx.register_func((Content.TEXT,), True)
+@register_func((Content.TEXT,), True)
 def menu(msg: wcferry.WxMsg) -> None:
     if all(
             (
-                    msg.sender in config["plugins"]["menu"]["access"],
-                    config["plugins"]["menu"]["enable"],
+                    msg.sender in config["plugins"]["info"]["menu"]["access"],
+                    config["plugins"]["info"]["menu"]["enable"],
                     msg.content == "@菜单",
             )
     ):
-        suswx.wcf.send_text(MENU, msg.sender)
-        suswx.logger.info("send menu message")
+        wcf.send_text(MENU, msg.sender)
+        logger.info("send menu message")

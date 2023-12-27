@@ -6,23 +6,22 @@
 import requests
 import wcferry
 
-import suswx
-from suswx import Content
 from Configuration import config
+from suswx import register_func, wcf, logger, Content
 
 
-@suswx.register_func((Content.TEXT,), True)
+@register_func((Content.TEXT,), True)
 def hitokoto(msg: wcferry.WxMsg) -> None:
     if all(
             (
-                    msg.sender in config["plugins"]["hitokoto"]["access"],
-                    config["plugins"]["hitokoto"]["enable"],
+                    msg.sender in config["plugins"]["info"]["hitokoto"]["access"],
+                    config["plugins"]["info"]["hitokoto"]["enable"],
                     msg.content == "@一言",
             )
     ):
         resp: dict = requests.get("https://v1.hitokoto.cn", timeout=3).json()
-        suswx.wcf.send_text(
+        wcf.send_text(
             response := f'{resp["hitokoto"]}\n----{resp["from"]}[{resp["from_who"]}]',
             msg.sender,
         )
-        suswx.logger.info(response)
+        logger.info(response)
