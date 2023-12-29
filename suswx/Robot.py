@@ -8,20 +8,38 @@ import logging
 import queue
 import time
 from threading import Thread
-from typing import Callable
+from typing import Callable, Literal, Optional
 
 import wcferry
 from wcferry import Wcf, WxMsg
 
-from suswx import Content
+from suswx import Content, ProcessMsgFunc
 
-__all__ = ["robot", "wcf", "logger", "register_func", "register_command"]
+__all__ = ["robot", "wcf", "logger", "register_func", "register_command", "register_"]
 
 wcf: Wcf = wcferry.Wcf()
 logger: logging.Logger = logging.getLogger()
-msgtype: tuple[int, ...] = (1, 3, 37, 47, 1090519089)
-func_registry: dict[int, tuple[set, set]] = {i: (set(), set()) for i in msgtype}
-command_registry: dict[int, set] = {i: set() for i in msgtype}
+MsgType = Literal[1, 3, 37, 47, 1090519089]
+msgtypes: tuple[MsgType, ...] = (1, 3, 37, 47, 1090519089)
+func_registry: dict[MsgType, tuple[set, set]] = {i: (set(), set()) for i in msgtypes}
+command_registry: dict[int, set] = {i: set() for i in msgtypes}
+registry_: list[ProcessMsgFunc] = []
+start_mode = Literal["mt", "async"]
+
+
+def register_(
+        msgType: tuple[Content] = (Content.TEXT,),
+        fromFriend: bool = False,
+        fromGroup: bool = False,
+        fromAdmin: bool = False,
+        name: Optional[str] = None,
+        mode: start_mode = "mt",
+) -> Callable[[Callable[[WxMsg], None]], None]:
+    def inner(func: Callable[[WxMsg], None]) -> None:
+        func_name = name if name is not None else func.__name__
+        registry_.append(ProcessMsgFunc(func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode))
+
+    return inner
 
 
 def register_func(
@@ -54,60 +72,63 @@ class Robot(object):
     A WeChat robot framework
     """
 
-    def __init__(self, admin: str = None) -> None:
-        self.wcf: Wcf = wcf
+    def __init__(self) -> None:
         self.admin: str = wcf.get_self_wxid()
-        if admin := list(filter(lambda x: x['name'] == admin, wcf.get_friends())):
-            self.admin = admin[0]['wxid']
-        self._registry: dict[int, tuple[set, set]] = func_registry
-        self.command: dict[int, set] = command_registry
-        self.logger: logging.Logger = logger
+        self.interval: float = 0.5
 
     def run(self) -> None:
         """
         Keep the bot running and processing information
         """
-        self.wcf.enable_receiving_msg()
-        interval: float = 0.5
-        while self.wcf.is_receiving_msg():
-            time.sleep(interval)
+        wcf.enable_receiving_msg()
+        while wcf.is_receiving_msg():
+            time.sleep(self.interval)
             try:
-                msg: WxMsg = self.wcf.get_msg()
-                self.process(msg)
+                msg: WxMsg = wcf.get_msg()
+                self.process_(msg)
             except queue.Empty:
                 continue
+
+    def process_(self, msg: WxMsg) -> None:
+        if not msg.from_group() and msg.is_text():
+            logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
+        for func in registry_:
+            if func.check(msg, self.admin):
+                func.process(msg)
 
     def process(self, msg: WxMsg) -> None:
         """
         Group and process information
         :param msg: WxMsg to process
         """
-        from_group: int = int(msg.from_group())
-        from_self: bool = msg.sender == self.admin
+        pass
+        from_group: bool = msg.from_group()
+        # from_admin: bool = msg.sender == self.admin
+        # from_friend: bool = not (from_admin or from_group)
+        # msg_type: str = msg.type
         if not from_group and msg.is_text():
-            self.logger.info("[%s]: %s", self.wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
-        if from_self:
-            if msg.content == "/quit":
-                exit(0)
-            func: set[Callable] = self.command[msg.type]
-        elif self._registry.get(msg.type) is not None:
-            func: set[Callable] = self._registry[msg.type][from_group]
-        else:
-            return
-        if func:
-            for i in func:
-                Thread(target=i, args=(msg,)).start()
+            logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
+        # if from_admin:
+        #     if msg.content == "/quit":
+        #         exit(0)
+        #     func: set[Callable] = command_registry[msg.type]
+        # elif func_registry.get(msg.type) is not None:
+        #     func: set[Callable] = func_registry[msg.type][from_group]
+        # else:
+        #     return
+        # if func:
+        #     for i in func:
+        #         Thread(target=i, args=(msg,)).start()
 
 
-def robot(name: str = "SUSBOT", admin: str = None) -> Robot:
+def robot(name: str = "SUSBOT") -> Robot:
     """
     Get a WeChat bot
     :param name: the bot's name
-    :param admin: the administrator's wxid
     :return: robot instance, wcferry instance, logger instance, admin's wxid
     """
     logger.name = name
-    bot: Robot = Robot(admin)
+    bot: Robot = Robot()
     atexit.register(wcf.cleanup)
     atexit.register(lambda: print("Quit done"))
     return bot

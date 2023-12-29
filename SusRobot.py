@@ -21,9 +21,9 @@ class SusRobot:
     A WeChat Robot demo
     """
 
-    def __init__(self, admin: str = None) -> None:
+    def __init__(self) -> None:
         self.config = config
-        self.sus = robot(name=self.config["logger"]["name"], admin=admin)
+        self.sus = robot(name=self.config["logger"]["name"])
         plugins.load()
 
     def run(self) -> None:
@@ -34,7 +34,7 @@ class SusRobot:
 
 
 def main() -> None:
-    susbot = SusRobot(admin="\u3000\u3000")
+    susbot = SusRobot()
     susbot.run()
 
 

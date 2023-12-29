@@ -10,7 +10,7 @@ from wcferry import WxMsg
 import suswx
 from Configuration import config
 from plugins.AI.AI import AI
-from suswx import register_func, wcf, logger, Content
+from suswx import register_, wcf, logger, Content
 
 
 class Gemini(AI):
@@ -70,4 +70,4 @@ class Gemini(AI):
 
 
 gemini = Gemini()
-register_func((Content.TEXT,), True)(gemini.private_reply)
+register_(fromFriend=True)(gemini.private_reply)
