@@ -5,9 +5,9 @@
 # @Software: PyCharm
 import logging
 
+import plugins
 from Configuration import config
 from suswx import robot
-import plugins
 
 logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",

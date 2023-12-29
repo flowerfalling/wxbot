@@ -6,15 +6,13 @@
 #
 from suswx.Content import Content
 from suswx.ProcessMsgFunc import ProcessMsgFunc
-from suswx.Robot import robot, wcf, logger, register_func, register_command, register_
+from suswx.Robot import robot, wcf, logger, register
 
 __all__ = [
     "robot",
     "wcf",
     "logger",
-    "register_func",
-    "register_command",
     "Content",
     "ProcessMsgFunc",
-    "register_"
+    "register"
 ]

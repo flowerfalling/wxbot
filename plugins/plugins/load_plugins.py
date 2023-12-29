@@ -5,8 +5,8 @@
 # @Software: PyCharm
 from types import ModuleType
 
-from suswx import logger
 from Configuration import config
+from suswx import logger
 
 __all__ = ["load"]
 

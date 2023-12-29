@@ -7,7 +7,6 @@ import atexit
 import logging
 import queue
 import time
-from threading import Thread
 from typing import Callable, Literal, Optional
 
 import wcferry
@@ -15,7 +14,7 @@ from wcferry import Wcf, WxMsg
 
 from suswx import Content, ProcessMsgFunc
 
-__all__ = ["robot", "wcf", "logger", "register_func", "register_command", "register_"]
+__all__ = ["robot", "wcf", "logger", "register"]
 
 wcf: Wcf = wcferry.Wcf()
 logger: logging.Logger = logging.getLogger()
@@ -27,7 +26,7 @@ registry_: list[ProcessMsgFunc] = []
 start_mode = Literal["mt", "async"]
 
 
-def register_(
+def register(
         msgType: tuple[Content] = (Content.TEXT,),
         fromFriend: bool = False,
         fromGroup: bool = False,
@@ -38,31 +37,6 @@ def register_(
     def inner(func: Callable[[WxMsg], None]) -> None:
         func_name = name if name is not None else func.__name__
         registry_.append(ProcessMsgFunc(func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode))
-
-    return inner
-
-
-def register_func(
-        msgType: tuple[Content],
-        fromFriend: bool = False,
-        fromGroup: bool = False,
-) -> Callable[[Callable[[WxMsg], None]], None]:
-    def inner(func: Callable) -> None:
-        for i in msgType:
-            if fromFriend:
-                func_registry[i.value][0].add(func)
-            if fromGroup:
-                func_registry[i.value][1].add(func)
-
-    return inner
-
-
-def register_command(
-        msgType: tuple[Content],
-) -> Callable[[Callable[[WxMsg], None]], None]:
-    def inner(func: Callable[[WxMsg], None]) -> None:
-        for i in msgType:
-            command_registry[i.value].add(func)
 
     return inner
 
@@ -85,40 +59,16 @@ class Robot(object):
             time.sleep(self.interval)
             try:
                 msg: WxMsg = wcf.get_msg()
-                self.process_(msg)
+                self.process(msg)
             except queue.Empty:
                 continue
 
-    def process_(self, msg: WxMsg) -> None:
+    def process(self, msg: WxMsg) -> None:
         if not msg.from_group() and msg.is_text():
             logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
         for func in registry_:
             if func.check(msg, self.admin):
                 func.process(msg)
-
-    def process(self, msg: WxMsg) -> None:
-        """
-        Group and process information
-        :param msg: WxMsg to process
-        """
-        pass
-        from_group: bool = msg.from_group()
-        # from_admin: bool = msg.sender == self.admin
-        # from_friend: bool = not (from_admin or from_group)
-        # msg_type: str = msg.type
-        if not from_group and msg.is_text():
-            logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
-        # if from_admin:
-        #     if msg.content == "/quit":
-        #         exit(0)
-        #     func: set[Callable] = command_registry[msg.type]
-        # elif func_registry.get(msg.type) is not None:
-        #     func: set[Callable] = func_registry[msg.type][from_group]
-        # else:
-        #     return
-        # if func:
-        #     for i in func:
-        #         Thread(target=i, args=(msg,)).start()
 
 
 def robot(name: str = "SUSBOT") -> Robot:

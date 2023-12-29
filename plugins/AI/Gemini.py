@@ -7,10 +7,9 @@ import google.api_core.exceptions
 import google.generativeai as genai
 from wcferry import WxMsg
 
-import suswx
 from Configuration import config
 from plugins.AI.AI import AI
-from suswx import register_, wcf, logger, Content
+from suswx import register, wcf, logger
 
 
 class Gemini(AI):
@@ -70,4 +69,4 @@ class Gemini(AI):
 
 
 gemini = Gemini()
-register_(fromFriend=True)(gemini.private_reply)
+register(fromFriend=True)(gemini.private_reply)

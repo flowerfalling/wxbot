@@ -3,12 +3,12 @@
 # @Author  : 之落花--falling_flowers
 # @File    : ProcessMsgFunc.py
 # @Software: PyCharm
-import asyncio
 from threading import Thread
 from typing import Callable, Literal, Sequence
 
-from suswx import Content
 from wcferry import WxMsg
+
+from suswx import Content
 
 start_mode = Literal["mt", "async"]
 

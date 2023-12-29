@@ -6,7 +6,7 @@
 import wcferry
 
 from Configuration import config
-from suswx import register_, wcf, logger, Content
+from suswx import register, wcf, logger
 
 MENU = '''- /gpt help
 - %gemini help
@@ -14,7 +14,7 @@ MENU = '''- /gpt help
 - @菜单'''
 
 
-@register_(fromFriend=True)
+@register(fromFriend=True)
 def menu(msg: wcferry.WxMsg) -> None:
     if all(
             (
