@@ -1,25 +1,36 @@
-gpt:
-  access: # wxid(暂只支持私聊)
-    - wxid_xxxx1
-    - wxid_xxxx2
-    - wxid_xxxx3
-  enable: true
-gemini:
-  access:
-    - wxid_xxxx1
-    - wxid_xxxx2
-    - wxid_xxxx3
-  enable: true
-  token:  # Gemini's token
-hitokoto:
-  access:
-    - wxid_xxxx1
-    - wxid_xxxx2
-    - wxid_xxxx3
-  enable: true
-menu:
-  access:
-    - wxid_xxxx1
-    - wxid_xxxx2
-    - wxid_xxxx3
-  enable: true
+administrator:  # 可不填,默认当前微信号
+  name:
+  wxid:
+logger:
+  name: SUSBOT
+plugins:
+  info:
+    gemini:
+      access:
+        - wxid_xxxx
+        - wxid_xxxx
+        - wxid_xxxx
+      enable: true
+      token:  # gemini的token,没有token请不要开启gemini
+    gpt:
+      access:
+        - wxid_xxxx
+        - wxid_xxxx
+        - wxid_xxxx
+      enable: true
+    hitokoto:
+      access:
+        - wxid_xxxx
+        - wxid_xxxx
+        - wxid_xxxx
+      enable: true
+    menu:
+      access:
+        - wxid_xxxx
+        - wxid_xxxx
+        - wxid_xxxx
+      enable: true
+  list:  # 请将插件放在plugins目录下
+    - AI
+    - funcs
+    - Administrator
