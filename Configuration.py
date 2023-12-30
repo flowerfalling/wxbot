@@ -35,13 +35,13 @@ class Configuration(object):
         Save configuration to config file
         """
         with open(self.config_path, "w+", encoding='utf-8') as f:
-            yaml.dump(self.config, f)
+            yaml.dump(self.config, f, allow_unicode=True)
         self.load_config()
 
-    def __getitem__(self, item: str) -> dict:
-        if item in self.config:
-            return self.config[item]
-        raise None
+    def __getitem__(self, key: str) -> object:
+        if key in self.config:
+            return self.config[key]
+        return None
 
 
 config = Configuration()

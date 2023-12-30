@@ -5,14 +5,11 @@
 # @Software: PyCharm
 #
 from suswx.Content import Content
-from suswx.ProcessMsgFunc import ProcessMsgFunc
-from suswx.Robot import robot, wcf, logger, register
+from suswx.Registry import Registry, ProcessMsgFunc
+
 
 __all__ = [
-    "robot",
-    "wcf",
-    "logger",
     "Content",
+    "Registry",
     "ProcessMsgFunc",
-    "register"
 ]
