@@ -10,7 +10,8 @@ import requests
 from wcferry import WxMsg
 
 from plugins.AI.AI import AI
-from suswx import register, wcf, logger
+from suswx.bot import register
+from suswx.common import wcf, logger
 
 
 class GPT(AI):
@@ -112,4 +113,4 @@ class GPT(AI):
 
 
 gpt = GPT()
-register(fromFriend=True)(gpt.private_reply)
+register(fromFriend=True, name="gpt")(gpt.private_reply)

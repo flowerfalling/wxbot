@@ -11,7 +11,7 @@ from typing import TypeVar
 import wcferry
 
 from Configuration import config
-from suswx import wcf
+from suswx.common import wcf
 
 T: type = TypeVar('T', bound="AI.AIInfo")
 

@@ -7,7 +7,8 @@ import requests
 import wcferry
 
 from Configuration import config
-from suswx import register, wcf, logger
+from suswx.bot import register
+from suswx.common import wcf, logger
 
 
 @register(fromFriend=True)
