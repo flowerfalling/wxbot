@@ -7,7 +7,7 @@ import logging
 
 import plugins
 from Configuration import config
-from suswx import robot
+from suswx.bot import robot
 
 logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",

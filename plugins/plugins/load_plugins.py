@@ -6,7 +6,7 @@
 from types import ModuleType
 
 from Configuration import config
-from suswx import logger
+from suswx.common import logger
 
 __all__ = ["load"]
 
