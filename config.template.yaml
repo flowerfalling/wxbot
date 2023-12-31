@@ -1,8 +1,6 @@
 administrator:  # 可不填,默认当前微信号
   name:
   wxid:
-logger:
-  name: SUSBOT
 plugins:
   info:
     gemini:
