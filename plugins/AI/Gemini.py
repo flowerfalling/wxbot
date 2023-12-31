@@ -88,6 +88,6 @@ gemini_instance = Gemini()
 
 
 @init()
-@register(fromFriend=True)
+@register(fromFriend=True, enable=False)
 def gemini(msg: WxMsg) -> None:
     gemini_instance.private_reply(msg)

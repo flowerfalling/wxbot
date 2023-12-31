@@ -11,7 +11,7 @@ from typing import Callable, Optional
 from wcferry import WxMsg
 
 from suswx import Content, Registry, ProcessMsgFunc
-from suswx.common import wcf, logger, admin_wxid
+from suswx.common import wcf, logger, Admin, botadmin
 from suswx.Registry import func_startup_mode
 
 __all__ = ["robot", "register", "registry"]
@@ -44,7 +44,7 @@ class Robot(object):
     """
 
     def __init__(self) -> None:
-        self._admin: list[str] = admin_wxid
+        self._admin: Admin = botadmin
         self.interval: float = 0.5
 
     def run(self) -> None:
@@ -64,7 +64,7 @@ class Robot(object):
         if not msg.from_group() and msg.is_text():
             logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
         for func in registry:
-            if func.check(msg, self._admin[0]):
+            if func.check(msg, self._admin.wxid):
                 func.process(msg)
 
 

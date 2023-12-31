@@ -12,7 +12,7 @@ from Configuration import config
 from plugins import init
 from suswx import ProcessMsgFunc
 from suswx.bot import register, registry
-from suswx.common import wcf, logger, admin_wxid
+from suswx.common import wcf, logger, botadmin
 
 __all__ = ["special_func", "admin"]
 
@@ -32,21 +32,33 @@ class Administrator(object):
   /disable|enable name1[,name2[...]] func1[,func2[...]] 开启|禁止某人某功能权限
   /start|stop func1[,func2[,func3[...]] 开启|停止功能"""
 
-    def __init__(self) -> None:
-        self.admin: str = config["administrator"]["wxid"]
-
     def __call__(self, msg: WxMsg) -> None:
         """
         Function to process command
         :param msg: the command message
         """
         if msg.content == "/help":
-            wcf.send_text(self.HELP_DOCS, self.admin)
+            wcf.send_text(self.HELP_DOCS, botadmin.wxid)
         elif msg.content == "/state":
             funcs: Sequence[ProcessMsgFunc] = [i for i in registry]
             wcf.send_text("  STATE" + "".join(
                 (f"\n- {i.name}: {'enable' if i.enable else 'disable'}" for i in funcs if i.name not in special_func)
-            ), self.admin)
+            ), botadmin.wxid)
+        elif c := re.fullmatch("/admin (.*?)", msg.content):
+            admin_name: str = c.groups()[0]
+            contacts: list[dict] = wcf.get_friends()
+            contacts.append(wcf.get_info_by_wxid(wcf.get_self_wxid()))
+            new_admin = list(filter(lambda i: i["name"] == admin_name, contacts))
+            if len(new_admin) == 1:
+                config["administrator"]["name"] = new_admin[0]["name"]
+                botadmin.wxid = config["administrator"]["wxid"] = new_admin[0]["wxid"]
+                registry["ADMIN"].access = {botadmin.wxid}
+                wcf.send_text(info := f"Administrator rights have been transferred to user {admin_name}", msg.sender)
+            elif len(new_admin) == 0:
+                wcf.send_text(info := f"You do not have a user named {admin_name}, please check the username", botadmin.wxid)
+            else:
+                wcf.send_text(info := f"You have more than one friend named {admin_name}. Please make sure the username of the user you want to transfer administrator rights to is unique.", botadmin.wxid)
+            logger.info(info)
         elif c := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
             command: tuple = c.groups()
             mode: update_access_mode = command[0]
@@ -60,7 +72,8 @@ class Administrator(object):
             self.switch_func(funcs, mode)
         self.save_config()
 
-    def update_access(self, users: set[str], funcs: set[str], mode: update_access_mode) -> None:
+    @staticmethod
+    def update_access(users: set[str], funcs: set[str], mode: update_access_mode) -> None:
         """
         Change user permissions for specific features
         :param users: List of usernames
@@ -70,7 +83,7 @@ class Administrator(object):
         contacts: list[dict] = wcf.get_friends()
         contacts.append(wcf.get_info_by_wxid(wcf.get_self_wxid()))
         if stranger := users - {i['name'] for i in contacts}:
-            wcf.send_text(info := f"{stranger} are not your friends, please check the username", self.admin)
+            wcf.send_text(info := f"{stranger} are not your friends, please check the username", botadmin.wxid)
             logger.info(info)
         users -= stranger
         users_wxid = {i["wxid"] for i in contacts if i["name"] in users}
@@ -80,7 +93,7 @@ class Administrator(object):
             if f in special_func:
                 continue
             if not registry[f]:
-                wcf.send_text(info := f"function {f} does not exist", self.admin)
+                wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
                 logger.info(info)
                 continue
             if mode == "enable":
@@ -91,19 +104,20 @@ class Administrator(object):
                 continue
             wcf.send_text(
                 info := f"The {f} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
-                admin_wxid[0]
+                botadmin.wxid
             )
             logger.info(info)
 
-    def switch_func(self, funcs: Sequence[str], mode: switch_func_mode) -> None:
+    @staticmethod
+    def switch_func(funcs: Sequence[str], mode: switch_func_mode) -> None:
         for f in funcs:
             if not registry[f]:
-                wcf.send_text(info := f"function {f} does not exist", self.admin)
+                wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
             elif f == "ADMIN":
-                wcf.send_text(info := f"function ADMIN cannot be turned off", self.admin)
+                wcf.send_text(info := f"function ADMIN cannot be turned off", botadmin.wxid)
             else:
                 registry[f].enable = mode == "start"
-                wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", self.admin)
+                wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", botadmin.wxid)
             logger.info(info)
 
     @staticmethod
@@ -120,6 +134,6 @@ admin = Administrator()
 
 
 @init(False)
-@register(fromAdmin=True, name="ADMIN", access=set(admin_wxid))
+@register(fromAdmin=True, name="ADMIN", access={botadmin.wxid})
 def admin_func(msg: WxMsg) -> None:
     admin(msg)
