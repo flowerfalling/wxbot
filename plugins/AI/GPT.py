@@ -9,6 +9,7 @@ from typing import Optional
 import requests
 from wcferry import WxMsg
 
+from plugins import init
 from plugins.AI.AI import AI
 from suswx.bot import register
 from suswx.common import wcf, logger
@@ -112,5 +113,10 @@ class GPT(AI):
             )
 
 
-gpt = GPT()
-register(fromFriend=True, name="gpt")(gpt.private_reply)
+gpt_instance = GPT()
+
+
+@init()
+@register(fromFriend=True)
+def gpt(msg: WxMsg) -> None:
+    gpt_instance.private_reply(msg)

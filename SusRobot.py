@@ -6,7 +6,6 @@
 import logging
 
 import plugins
-from Configuration import config
 from suswx.bot import robot
 
 logging.basicConfig(
@@ -22,8 +21,7 @@ class SusRobot:
     """
 
     def __init__(self) -> None:
-        self.config = config
-        self.sus = robot(name=self.config["logger"]["name"])
+        self.sus = robot()
         plugins.load()
 
     def run(self) -> None:

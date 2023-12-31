@@ -7,10 +7,12 @@ import requests
 import wcferry
 
 from Configuration import config
+from plugins import init
 from suswx.bot import register
 from suswx.common import wcf, logger
 
 
+@init()
 @register(fromFriend=True)
 def hitokoto(msg: wcferry.WxMsg) -> None:
     if all(

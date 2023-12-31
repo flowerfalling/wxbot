@@ -21,12 +21,12 @@ class ProcessMsgFunc(object):
             func: Callable[[WxMsg], None],
             name: str,
             msgType: Sequence[Content],
-            fromfriend: bool = False,
-            fromgroup: bool = False,
-            fromadmin: bool = False,
-            mode: func_startup_mode = "mt",
-            enable: bool = False,
-            access: Optional[list] = None
+            fromfriend: bool,
+            fromgroup: bool,
+            fromadmin: bool,
+            mode: func_startup_mode,
+            enable: bool,
+            access: Optional[set],
     ) -> None:
         self.func: Callable[[WxMsg], None] = func
         self.name: str = name
@@ -37,8 +37,9 @@ class ProcessMsgFunc(object):
         self.match: list = [self.fromfriend, self.fromgroup, self.fromadmin]
         self.mode: func_startup_mode = mode
         self.enable: bool = enable
+        self.access = access
         if access is None:
-            self.access: list[str] = []
+            self.access: set[str] = set()
 
     def check(self, msg: WxMsg, admin: str) -> bool:
         from_group: bool = msg.from_group()
@@ -48,7 +49,8 @@ class ProcessMsgFunc(object):
         if all((
                 self.enable,
                 msg.type in self.msgtype,
-                [i and j for (i, j) in zip(source, self.match)] == self.match
+                [i and j for (i, j) in zip(source, self.match)] == self.match,
+                msg.sender in self.access or "ALL" in self.access
         )):
             return True
         return False
@@ -74,8 +76,11 @@ class Registry(object):
     def names(self):
         return [i.name for i in self._registry]
 
-    def __getitem__(self, name):
+    def __getitem__(self, name) -> Optional[ProcessMsgFunc]:
         if item := list(filter(lambda i: i.name == name, self._registry)):
             return item[0]
         else:
             return None
+
+    def __iter__(self):
+        return iter(self._registry)

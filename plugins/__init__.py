@@ -3,6 +3,19 @@
 # @Author  : 之落花--falling_flowers
 # @File    : __init__.py.py
 # @Software: PyCharm
-from plugins.plugins.load_plugins import load
+from Configuration import config
+from plugins.plugins.utils import load, init
+from schema import Schema
 
-__all__ = ["load"]
+__all__ = ["load", "init"]
+
+plugins_schma = Schema({"info": dict, "list": list})
+
+
+def init_plugins_config():
+    config.config["plugins"] = {"info": {}, "list": []}
+    config.save_config()
+
+
+if "plugins" not in config.config or not plugins_schma.is_valid(config.config["plugins"]):
+    init_plugins_config()

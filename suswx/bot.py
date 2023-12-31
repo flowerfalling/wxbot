@@ -26,10 +26,14 @@ def register(
         fromAdmin: bool = False,
         name: Optional[str] = None,
         mode: func_startup_mode = "mt",
-) -> Callable[[Callable[[WxMsg], None]], None]:
-    def inner(func: Callable[[WxMsg], None]) -> None:
+        enable: bool = True,
+        access: Optional[set] = None
+) -> Callable[[Callable[[WxMsg], None]], ProcessMsgFunc]:
+    def inner(func: Callable[[WxMsg], None]) -> ProcessMsgFunc:
         func_name = name if name is not None else func.__name__
-        registry.add(ProcessMsgFunc(func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode))
+        process_func = ProcessMsgFunc(func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode, enable, access)
+        registry.add(process_func)
+        return process_func
 
     return inner
 

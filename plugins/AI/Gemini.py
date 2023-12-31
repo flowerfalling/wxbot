@@ -4,13 +4,17 @@
 # @File    : Gemini.py
 # @Software: PyCharm
 import google.api_core.exceptions
+import google.auth.exceptions
 import google.generativeai as genai
+from schema import Schema
 from wcferry import WxMsg
 
 from Configuration import config
+from plugins import init
 from plugins.AI.AI import AI
-from suswx.common import wcf, logger
 from suswx.bot import register
+from suswx.common import wcf, logger
+from plugins.Administrator.Administrator import admin
 
 
 class Gemini(AI):
@@ -42,6 +46,11 @@ class Gemini(AI):
                 google.generativeai.types.generation_types.StopCandidateException) as e:
             wcf.send_text(resp := "Sorry, an exception occurs because of your prompt", sender)
             logger.info(e)
+        except google.auth.exceptions.DefaultCredentialsError as e:
+            resp = "Sorry, there may be an error in the gemini token, and the gemini function has been stopped."
+            admin.switch_func("gemini", "stop")
+            wcf.send_text(resp, sender)
+            logger.info(e)
         finally:
             logger.info(resp)
 
@@ -59,7 +68,7 @@ class Gemini(AI):
 
         def __init__(self, model: genai.GenerativeModel, name: str, key: str) -> None:
             super().__init__(name, key)
-            self.chat: genai.ChatSession = model.start_chat(history=[])
+            self.chat: genai.ChatSession = model.start_chat()
 
         def command(self, order: str) -> str:
             return self._process_command(
@@ -69,5 +78,16 @@ class Gemini(AI):
             )
 
 
-gemini = Gemini()
-register(fromFriend=True, name="gemini")(gemini.private_reply)
+gemini_schma = Schema({"access": list, "enable": bool, "token": str})
+
+if not gemini_schma.is_valid(config["plugins"]["info"]["gemini"]):
+    config["plugins"]["info"]["gemini"]["token"] = ""
+    config.save_config()
+
+gemini_instance = Gemini()
+
+
+@init()
+@register(fromFriend=True)
+def gemini(msg: WxMsg) -> None:
+    gemini_instance.private_reply(msg)
