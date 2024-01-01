@@ -94,7 +94,7 @@ Call any of them func
 Administrator documentation
   /help  # Get help
   /state  # View functions' status
-  /disable|enable name1[,name2[...]] func1[,func2[...]]  # Enable | Disable someone's permission for some functions
+  /disable|enable name1[,name2[...]] func1[,func2[...]]|all  # Enable | Disable someone's permission for some|all functions
   /start|stop func1[,func2[,func3[...]]  # Start | Stop functions
   /admin name  # Transfer administrator's identity
   /quit  # Exit robot
