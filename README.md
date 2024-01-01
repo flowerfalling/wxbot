@@ -41,16 +41,10 @@ python -m pip install -U pip
 pip install -r requirements.txt
 ```
 
-### Configuration
-
-Create a `config.yaml` file and then enter the configuration in the `config.template.yaml` style
-
-_If you do not use gemini and do not fill in the gemini token, please do not set the enable item of genimi to true_
-
 ### Get Start
 
 ```Shell
-python demo.py
+python SusRobot.py
 
 # To stop, press Ctrl+C
 ```
@@ -102,9 +96,11 @@ Administrator documentation
   /state  # View functions' status
   /disable|enable name1[,name2[...]] func1[,func2[...]]  # Enable | Disable someone's permission for some functions
   /start|stop func1[,func2[,func3[...]]  # Start | Stop functions
+  /admin name  # Transfer administrator's identity
   /quit  # Exit robot
 ```
 
+_Gimini is not enabled by default, please fill in the token in plugins-info-gemini-token in config.yaml and restart (then enbale it)_
 </details>
 
 ## Do not abuse gpt
