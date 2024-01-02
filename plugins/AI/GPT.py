@@ -6,6 +6,7 @@
 import json
 from typing import Optional
 
+import aiohttp
 import requests
 from wcferry import WxMsg
 
@@ -39,15 +40,15 @@ class GPT(AI):
     def __init__(self) -> None:
         super().__init__("GPT", "/")
 
-    def private_reply(self, msg: WxMsg) -> None:
+    async def private_reply(self, msg: WxMsg) -> None:
         """
         Methods for answering WeChat private messages by GPT
         :param msg: Pending friend's message
         """
-        self._reply(msg=msg, get_default_info=lambda: GPT._GPTInfo(self.name, self.key))
+        await self._reply(msg=msg, get_default_info=lambda: GPT._GPTInfo(self.name, self.key))
 
-    def _ai_response(self, content: str, sender: str, user_info: "GPT._GPTInfo") -> None:
-        if response := self.__get_reply(content[int(not user_info.state):], user_info):
+    async def _ai_response(self, content: str, sender: str, user_info: "GPT._GPTInfo") -> None:
+        if response := await self.__get_reply(content[int(not user_info.state):], user_info):
             user_info.pmid = response["id"]
             wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
             logger.info(resp)
@@ -55,7 +56,7 @@ class GPT(AI):
             wcf.send_text(resp := "Sorry, GPT's answer timed out", sender)
             logger.info(resp)
 
-    def __get_reply(self, msg: str, info: "GPT._GPTInfo") -> Optional[dict]:
+    async def __get_reply(self, msg: str, info: "GPT._GPTInfo") -> Optional[dict]:
         """
         Get GPT answer
         :param msg: content of message
@@ -63,20 +64,34 @@ class GPT(AI):
         :return: a tuple of pmid and response's text or None(ConnectionError or other)
         """
         try:
-            response: dict[str, str] = json.loads(
-                requests.post(
-                    self.__URL,
-                    headers=self.__HEADERS,
-                    json={
-                        "prompt": msg,
-                        "options": {"parentMessageId": info.pmid} if info.pmid else {},
-                        "systemMessage": self.__SYSTEM_MESSAGE,
-                        "temperature": info.temperature,
-                        "top_p": info.top_p,
-                    },
-                    timeout=20,
-                ).text.split("&KFw6loC9Qvy&")[-1]
-            )
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
+                async with session.post(
+                        self.__URL,
+                        headers=self.__HEADERS,
+                        json={
+                            "prompt": msg,
+                            "options": {"parentMessageId": info.pmid} if info.pmid else {},
+                            "systemMessage": self.__SYSTEM_MESSAGE,
+                            "temperature": info.temperature,
+                            "top_p": info.top_p,
+                        },
+                ) as resp:
+                    response: dict[str, str] = json.loads((await resp.text()).split("&KFw6loC9Qvy&")[-1])
+
+            # response: dict[str, str] = json.loads(
+            #     requests.post(
+            #         self.__URL,
+            #         headers=self.__HEADERS,
+            #         json={
+            #             "prompt": msg,
+            #             "options": {"parentMessageId": info.pmid} if info.pmid else {},
+            #             "systemMessage": self.__SYSTEM_MESSAGE,
+            #             "temperature": info.temperature,
+            #             "top_p": info.top_p,
+            #         },
+            #         timeout=20,
+            #     ).text.split("&KFw6loC9Qvy&")[-1]
+            # )
             return {"id": response["id"], "text": response["text"]}
         except requests.exceptions.RequestException:
             return None
@@ -117,6 +132,6 @@ gpt_instance = GPT()
 
 
 @init()
-@register(fromFriend=True)
-def gpt(msg: WxMsg) -> None:
-    gpt_instance.private_reply(msg)
+@register(fromFriend=True, mode="async")
+async def gpt(msg: WxMsg) -> None:
+    await gpt_instance.private_reply(msg)

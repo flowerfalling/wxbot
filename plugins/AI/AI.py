@@ -33,14 +33,14 @@ class AI(ABC):
         self.key: str = key
 
     @abstractmethod
-    def private_reply(self, msg: wcferry.WxMsg) -> None:
+    async def private_reply(self, msg: wcferry.WxMsg) -> None:
         """
         Function to reply to private message
         :param msg: 要处理的消息
         """
         ...
 
-    def _reply(
+    async def _reply(
             self,
             msg: wcferry.WxMsg,
             get_default_info: Callable[[], T],
@@ -60,11 +60,11 @@ class AI(ABC):
                 while user_info.waiting:
                     time.sleep(0.5)
             user_info.wait()
-            self._ai_response(content, sender, user_info)
+            await self._ai_response(content, sender, user_info)
             user_info.wake()
 
     @abstractmethod
-    def _ai_response(self, content: str, sender: str, user_info: "T") -> None:
+    async def _ai_response(self, content: str, sender: str, user_info: "T") -> None:
         """
         Function to get AI's reply
         :param content: Message content

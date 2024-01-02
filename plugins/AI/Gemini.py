@@ -12,9 +12,8 @@ from wcferry import WxMsg
 from Configuration import config
 from plugins import init
 from plugins.AI.AI import AI
-from suswx.bot import register
+from suswx.bot import register, registry
 from suswx.common import wcf, logger
-from plugins.Administrator.Administrator import admin
 
 
 class Gemini(AI):
@@ -27,17 +26,17 @@ class Gemini(AI):
         genai.configure(api_key=config["plugins"]["info"]["gemini"]["token"])
         self.__model: genai.GenerativeModel = genai.GenerativeModel('gemini-pro')
 
-    def private_reply(self, msg: WxMsg) -> None:
+    async def private_reply(self, msg: WxMsg) -> None:
         """
         Methods for answering WeChat private messages by Gemini
         :param msg: Pending friend's message
         """
-        self._reply(msg=msg, get_default_info=lambda: Gemini._GeminiInfo(self.__model, self.name, self.key))
+        await self._reply(msg=msg, get_default_info=lambda: Gemini._GeminiInfo(self.__model, self.name, self.key))
 
-    def _ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
+    async def _ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
         resp: str = "something wents wrong"
         try:
-            response: genai.types.GenerateContentResponse = user_info.chat.send_message(
+            response: genai.types.AsyncGenerateContentResponse = await user_info.chat.send_message_async(
                 content=content[int(not user_info.state):])
             wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
         except google.api_core.exceptions.GoogleAPIError:
@@ -48,7 +47,7 @@ class Gemini(AI):
             logger.info(e)
         except google.auth.exceptions.DefaultCredentialsError as e:
             resp = "Sorry, there may be an error in the gemini token, and the gemini function has been stopped."
-            admin.switch_func("gemini", "stop")
+            registry["gemini"].enable = False
             wcf.send_text(resp, sender)
             logger.info(e)
         finally:
@@ -88,6 +87,6 @@ gemini_instance = Gemini()
 
 
 @init()
-@register(fromFriend=True, enable=False)
-def gemini(msg: WxMsg) -> None:
-    gemini_instance.private_reply(msg)
+@register(fromFriend=True, enable=False, mode="async")
+async def gemini(msg: WxMsg) -> None:
+    await gemini_instance.private_reply(msg)
