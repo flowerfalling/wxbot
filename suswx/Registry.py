@@ -3,6 +3,8 @@
 # @Author  : 之落花--falling_flowers
 # @File    : Registry.py
 # @Software: PyCharm
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 from typing import Callable, Literal, Sequence, Optional
 
@@ -55,13 +57,6 @@ class ProcessMsgFunc(object):
             return True
         return False
 
-    def process(self, msg: WxMsg) -> None:
-        match self.mode:
-            case "mt":
-                Thread(target=self.func, args=(msg,), daemon=True).start()
-            # case "async":
-            #     asyncio.create_task(self.func(msg))
-
     def __hash__(self):
         return hash(self.name)
 
@@ -69,12 +64,26 @@ class ProcessMsgFunc(object):
 class Registry(object):
     def __init__(self):
         self._registry: set[ProcessMsgFunc] = set()
+        self.mt: set[ProcessMsgFunc] = set()
+        self.acync: set[ProcessMsgFunc] = set()
 
     def add(self, func: ProcessMsgFunc):
         self._registry.add(func)
+        if func.mode == 'mt':
+            self.mt.add(func)
+        elif func.mode == 'async':
+            self.acync.add(func)
+        else:
+            raise ValueError(f"Wrong startup method {func.mode}")
 
     def names(self):
         return [i.name for i in self._registry]
+
+    async def process(self, msg: WxMsg) -> None:
+        for f in self.mt:
+            if f.check(msg):
+                self.mt_executor.submit(f.func, msg)
+        await asyncio.gather(*[f.func(msg) for f in self.acync])
 
     def __getitem__(self, name) -> Optional[ProcessMsgFunc]:
         if item := list(filter(lambda i: i.name == name, self._registry)):

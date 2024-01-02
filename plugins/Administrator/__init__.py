@@ -41,5 +41,5 @@ else:
 
 config.save_config()
 admin = config["administrator"]
-botadmin.wxid = config["administrator"]["wxid"]
+botadmin.wxid = admin["wxid"]
 logger.info(f"Loaded admin, name: {admin['name']}, wxid: {admin['wxid']}")

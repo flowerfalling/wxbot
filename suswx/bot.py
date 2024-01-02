@@ -6,6 +6,7 @@
 import atexit
 import queue
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Optional
 
 from wcferry import WxMsg
@@ -13,6 +14,7 @@ from wcferry import WxMsg
 from suswx import Content, Registry, ProcessMsgFunc
 from suswx.common import wcf, logger, Admin, botadmin
 from suswx.Registry import func_startup_mode
+import asyncio
 
 __all__ = ["robot", "register", "registry"]
 
@@ -46,26 +48,28 @@ class Robot(object):
     def __init__(self) -> None:
         self._admin: Admin = botadmin
         self.interval: float = 0.5
+        self.mt_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=50)
 
-    def run(self) -> None:
+    async def run(self) -> None:
         """
         Keep the bot running and processing information
         """
         wcf.enable_receiving_msg()
         while wcf.is_receiving_msg():
-            time.sleep(self.interval)
+            await asyncio.sleep(self.interval)
             try:
                 msg: WxMsg = wcf.get_msg()
-                self.process(msg)
+                await self.process(msg)
             except queue.Empty:
                 continue
 
-    def process(self, msg: WxMsg) -> None:
+    async def process(self, msg: WxMsg) -> None:
         if not msg.from_group() and msg.is_text():
             logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
-        for func in registry:
-            if func.check(msg, self._admin.wxid):
-                func.process(msg)
+        for f in registry.mt:
+            if f.check(msg, self._admin.wxid):
+                self.mt_executor.submit(f.func, msg)
+        await asyncio.gather(*[asyncio.create_task(f.func(msg)) for f in registry.acync if f.check(msg, self._admin.wxid)])
 
 
 def robot(name: str = "SUSBOT") -> Robot:
