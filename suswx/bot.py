@@ -8,6 +8,7 @@ import queue
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Optional
+from threading import Thread
 
 from wcferry import WxMsg
 
@@ -19,6 +20,7 @@ import asyncio
 __all__ = ["robot", "register", "registry"]
 
 registry: Registry = Registry()
+msgQ = queue.Queue()
 
 
 def register(
@@ -58,8 +60,8 @@ class Robot(object):
         while wcf.is_receiving_msg():
             await asyncio.sleep(self.interval)
             try:
-                msg: WxMsg = wcf.get_msg()
-                await self.process(msg)
+                msg: WxMsg = wcf.get_msg(block=False)
+                asyncio.run_coroutine_threadsafe(self.process(msg), asyncio.get_running_loop())
             except queue.Empty:
                 continue
 
