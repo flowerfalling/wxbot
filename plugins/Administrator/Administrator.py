@@ -30,7 +30,9 @@ class Administrator(object):
   /help 获取帮助
   /state 查看功能状态
   /disable|enable name1[,name2[...]] func1[,func2[...]] 开启|禁止某人某功能权限
-  /start|stop func1[,func2[,func3[...]] 开启|停止功能"""
+  /start|stop func1[,func2[,func3[...]] 开启|停止功能
+  /admin name 转移管理员身份
+  /config 重新加载配置文件(暂时没用)"""
 
     def __call__(self, msg: WxMsg) -> None:
         """
@@ -44,6 +46,9 @@ class Administrator(object):
             wcf.send_text("  STATE" + "".join(
                 (f"\n- {i.name}: {'enable' if i.enable else 'disable'}" for i in funcs if i.name not in special_func)
             ), botadmin.wxid)
+        elif msg.content == "/config":  # TODO Sync configuration
+            config.load_config()
+            wcf.send_text("Configuration reloaded", botadmin.wxid)
         elif c := re.fullmatch("/admin (.*?)", msg.content):
             admin_name: str = c.groups()[0]
             contacts: list[dict] = wcf.get_friends()
@@ -110,10 +115,15 @@ class Administrator(object):
 
     @staticmethod
     def switch_func(funcs: Sequence[str], mode: switch_func_mode) -> None:
+        """
+        Set robot function switch
+        :param funcs: function name sequence
+        :param mode: enable/disable
+        """
         for f in funcs:
             if not registry[f]:
                 wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
-            elif f == "ADMIN":
+            elif f in special_func:
                 wcf.send_text(info := f"function ADMIN cannot be turned off", botadmin.wxid)
             else:
                 registry[f].enable = mode == "start"
@@ -121,7 +131,10 @@ class Administrator(object):
             logger.info(info)
 
     @staticmethod
-    def save_config():
+    def save_config() -> None:
+        """
+        Save the status of each function to config.yaml
+        """
         for f in registry:
             if f.name in special_func:
                 continue
@@ -130,7 +143,7 @@ class Administrator(object):
         config.save_config()
 
 
-admin = Administrator()
+admin: Administrator = Administrator()
 
 
 @init(False)
