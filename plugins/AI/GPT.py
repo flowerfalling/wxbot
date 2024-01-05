@@ -3,7 +3,6 @@
 # @Author  : 之落花--falling_flowers
 # @File    : GPT.py
 # @Software: PyCharm
-import asyncio
 import json
 from typing import Optional
 
@@ -77,7 +76,6 @@ class GPT(AI):
                             "top_p": info.top_p,
                         },
                 ) as resp:
-                    await asyncio.sleep(5)
                     response: dict[str, str] = json.loads((await resp.text()).split("&KFw6loC9Qvy&")[-1])
             return {"id": response["id"], "text": response["text"]}
         except requests.exceptions.RequestException:
