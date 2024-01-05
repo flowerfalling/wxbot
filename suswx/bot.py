@@ -81,6 +81,8 @@ class Robot(object):
                 asyncio.run_coroutine_threadsafe(self.process(msg), asyncio.get_running_loop())
             except Empty:
                 continue
+            except Exception as e:
+                logger.error(f"Receiving message error: {e}")
 
     async def process(self, msg: WxMsg) -> None:
         """
