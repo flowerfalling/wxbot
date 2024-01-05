@@ -3,12 +3,9 @@
 # @Author  : 之落花--falling_flowers
 # @File    : bot.py
 # @Software: PyCharm
-import atexit
-import queue
-import time
+from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Optional
-from threading import Thread
 
 from wcferry import WxMsg
 
@@ -20,7 +17,7 @@ import asyncio
 __all__ = ["robot", "register", "registry"]
 
 registry: Registry = Registry()
-msgQ = queue.Queue()
+msgQ: Queue = Queue()
 
 
 def register(
@@ -33,9 +30,26 @@ def register(
         enable: bool = True,
         access: Optional[set] = None
 ) -> Callable[[Callable[[WxMsg], None]], ProcessMsgFunc]:
+    """
+    Register a function in the registry, usually used as a decorator
+    :param msgType: Message types allowed to be processed
+    :param fromFriend: Whether to handle messages from friends
+    :param fromGroup: Whether to handle messages from groups
+    :param fromAdmin: Whether to handle messages from the admin
+    :param name: Function name (default function name)
+    :param mode: Function startup method (multithreaded "mt" or asynchronous "async")
+    :param enable: Whether to enable
+    :param access: The set of wxids of allowed message senders
+    :return: A decorator used to register functions
+    """
     def inner(func: Callable[[WxMsg], None]) -> ProcessMsgFunc:
-        func_name = name if name is not None else func.__name__
-        process_func = ProcessMsgFunc(func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode, enable, access)
+        """
+        A decorator used to register functions
+        :return: Registered ProcessMsgFunc instance
+        """
+        func_name: str = name if name is not None else func.__name__
+        process_func: ProcessMsgFunc = ProcessMsgFunc(
+            func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode, enable, access)
         registry.add(process_func)
         return process_func
 
@@ -52,7 +66,10 @@ class Robot(object):
         self.interval: float = 0.5
         self.mt_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=50)
 
-    async def run(self) -> None:
+    def run(self) -> None:
+        asyncio.run(self.start())
+
+    async def start(self) -> None:
         """
         Keep the bot running and processing information
         """
@@ -62,10 +79,13 @@ class Robot(object):
             try:
                 msg: WxMsg = wcf.get_msg(block=False)
                 asyncio.run_coroutine_threadsafe(self.process(msg), asyncio.get_running_loop())
-            except queue.Empty:
+            except Empty:
                 continue
 
     async def process(self, msg: WxMsg) -> None:
+        """
+        Process and log messages
+        """
         if not msg.from_group() and msg.is_text():
             logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
         for f in registry.mt:
@@ -82,6 +102,4 @@ def robot(name: str = "SUSBOT") -> Robot:
     """
     logger.name = name
     bot: Robot = Robot()
-    atexit.register(wcf.cleanup)
-    atexit.register(lambda: print("Quit done"))
     return bot
