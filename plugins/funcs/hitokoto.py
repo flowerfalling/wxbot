@@ -15,6 +15,9 @@ import aiohttp
 @init()
 @register(fromFriend=True, mode="async")
 async def hitokoto(msg: wcferry.WxMsg) -> None:
+    """
+    Hitokoto, represents the touch of words and the communication of souls
+    """
     if all(
             (
                     msg.sender in config["plugins"]["info"]["hitokoto"]["access"],

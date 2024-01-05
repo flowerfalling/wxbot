@@ -48,5 +48,5 @@ class Configuration(object):
         return None
 
 
-config = Configuration()
+config: Configuration = Configuration()
 

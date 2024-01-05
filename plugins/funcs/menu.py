@@ -19,6 +19,9 @@ MENU = '''- /gpt help
 @init()
 @register(fromFriend=True)
 def menu(msg: wcferry.WxMsg) -> None:
+    """
+    function list
+    """
     if all(
             (
                     msg.sender in config["plugins"]["info"]["menu"]["access"],
