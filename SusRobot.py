@@ -3,7 +3,6 @@
 # @Author  : 之落花--falling_flowers
 # @File    : SusRobot.py
 # @Software: PyCharm
-import asyncio
 import logging
 
 import plugins
@@ -25,17 +24,11 @@ class SusRobot:
         self.sus = robot()
         plugins.load()
 
-    async def run(self) -> None:
-        """
-        Start the robot
-        """
-        await self.sus.run()
 
-
-async def main() -> None:
-    susbot = SusRobot()
-    await susbot.run()
+def main() -> None:
+    susbot: SusRobot = SusRobot()
+    susbot.sus.run()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
