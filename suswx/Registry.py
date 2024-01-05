@@ -3,9 +3,6 @@
 # @Author  : 之落花--falling_flowers
 # @File    : Registry.py
 # @Software: PyCharm
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
-from threading import Thread
 from typing import Callable, Literal, Sequence, Optional
 
 from wcferry import WxMsg
@@ -28,8 +25,20 @@ class ProcessMsgFunc(object):
             fromadmin: bool,
             mode: func_startup_mode,
             enable: bool,
-            access: Optional[set],
+            access: set,
     ) -> None:
+        """
+        Message processing functions within the registry
+        :param func: a callable to process message
+        :param name: Function name
+        :param msgType: Message types allowed to be processed
+        :param fromfriend: Whether to handle messages from friends
+        :param fromgroup: Whether to handle messages from groups
+        :param fromadmin: Whether to handle messages from the admin
+        :param mode: Function startup method (multithreaded "mt" or asynchronous "async")
+        :param enable: Whether to enable
+        :param access: The set of wxids of allowed message senders
+        """
         self.func: Callable[[WxMsg], None] = func
         self.name: str = name
         self.msgtype: set = set([i.value for i in msgType])
@@ -40,14 +49,18 @@ class ProcessMsgFunc(object):
         self.mode: func_startup_mode = mode
         self.enable: bool = enable
         self.access = access
-        if access is None:
-            self.access: set[str] = set()
 
     def check(self, msg: WxMsg, admin: str) -> bool:
+        """
+        Check whether the message initially meets the requirements
+        :param msg: Messages to be checked
+        :param admin: Administrator's wxid
+        :return: whether the message meets the requirements
+        """
         from_group: bool = msg.from_group()
         from_admin: bool = msg.sender == admin
         from_friend: bool = not (from_admin or from_group)
-        source = [from_friend, from_group, from_admin]
+        source: list = [from_friend, from_group, from_admin]
         if all((
                 self.enable,
                 msg.type in self.msgtype,
@@ -57,7 +70,7 @@ class ProcessMsgFunc(object):
             return True
         return False
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name)
 
 
@@ -67,7 +80,11 @@ class Registry(object):
         self.mt: set[ProcessMsgFunc] = set()
         self.acync: set[ProcessMsgFunc] = set()
 
-    def add(self, func: ProcessMsgFunc):
+    def add(self, func: ProcessMsgFunc) -> None:
+        """
+        Add entries to the registry
+        :param func: the ProcessMsgFunc instance
+        """
         self._registry.add(func)
         if func.mode == 'mt':
             self.mt.add(func)
@@ -76,14 +93,12 @@ class Registry(object):
         else:
             raise ValueError(f"Wrong startup method {func.mode}")
 
-    def names(self):
+    @property
+    def names(self) -> list[str]:
+        """
+        :return: The names of all functions in the registry
+        """
         return [i.name for i in self._registry]
-
-    async def process(self, msg: WxMsg) -> None:
-        for f in self.mt:
-            if f.check(msg):
-                self.mt_executor.submit(f.func, msg)
-        await asyncio.gather(*[f.func(msg) for f in self.acync])
 
     def __getitem__(self, name) -> Optional[ProcessMsgFunc]:
         if item := list(filter(lambda i: i.name == name, self._registry)):

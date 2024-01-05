@@ -42,11 +42,10 @@ class Configuration(object):
             yaml.dump(self.config, f, allow_unicode=True)
         self.load_config()
 
-    def __getitem__(self, key: str) -> object:
+    def __getitem__(self, key: str) -> dict | object | None:
         if key in self.config:
             return self.config[key]
         return None
 
 
 config: Configuration = Configuration()
-

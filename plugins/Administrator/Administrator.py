@@ -93,7 +93,7 @@ class Administrator(object):
         users -= stranger
         users_wxid = {i["wxid"] for i in contacts if i["name"] in users}
         if funcs == {"all"}:
-            funcs = registry.names()
+            funcs = registry.names
         for f in funcs:
             if f in special_func:
                 continue

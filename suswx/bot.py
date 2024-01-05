@@ -32,16 +32,19 @@ def register(
 ) -> Callable[[Callable[[WxMsg], None]], ProcessMsgFunc]:
     """
     Register a function in the registry, usually used as a decorator
-    :param msgType: Message types allowed to be processed
+    :param msgType: a tuple of Message types allowed to be processed
     :param fromFriend: Whether to handle messages from friends
     :param fromGroup: Whether to handle messages from groups
     :param fromAdmin: Whether to handle messages from the admin
-    :param name: Function name (default function name)
+    :param name: Function name (Optional, default is function name)
     :param mode: Function startup method (multithreaded "mt" or asynchronous "async")
     :param enable: Whether to enable
-    :param access: The set of wxids of allowed message senders
+    :param access: The set of wxids of allowed message senders(Optional)
     :return: A decorator used to register functions
     """
+    if access is None:
+        access = set()
+
     def inner(func: Callable[[WxMsg], None]) -> ProcessMsgFunc:
         """
         A decorator used to register functions
