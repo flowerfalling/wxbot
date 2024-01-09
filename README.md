@@ -31,6 +31,9 @@ Now the bot only supports private chats, and does not support group chats for th
 git clone https://github.com/flowerfalling/wxbot.git
 ```
 
+_Download WeChat version 3.9.3.23 
+[Here](https://github.com/lich0821/WeChatFerry/releases/download/v39.0.12/WeChatSetup-3.9.2.23.exe)_
+
 ### Dependencies
 
 ```Shell
