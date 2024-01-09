@@ -16,6 +16,12 @@ admin_wxid: list[str] = [wcf.get_self_wxid()]
 atexit.register(wcf.cleanup)
 atexit.register(lambda: print("Quit done"))
 
+logging.basicConfig(
+    datefmt="%Y-%m-%d %H:%M:%S",
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    level=logging.INFO,
+)
+
 
 class Admin(object):
     def __init__(self):

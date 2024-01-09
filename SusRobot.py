@@ -8,12 +8,6 @@ import logging
 import plugins
 from suswx.bot import robot
 
-logging.basicConfig(
-    datefmt="%Y-%m-%d %H:%M:%S",
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    level=logging.INFO,
-)
-
 
 class SusRobot:
     """
