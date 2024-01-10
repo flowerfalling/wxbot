@@ -27,7 +27,7 @@ else:
     if admin_name is None:
         init_admin_config()
     else:
-        admin = list(filter(lambda x: x["name"] == admin_name, wcf.get_friends()))
+        admin = list(filter(lambda x: x["name"] == admin_name, wcf.get_friends() + [wcf.get_user_info()]))
         match len(admin):
             case 0:
                 logger.warning(f"Unable to find admin named {admin_name}")
