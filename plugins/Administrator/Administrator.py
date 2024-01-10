@@ -8,6 +8,7 @@ from typing import Sequence, Literal
 
 from wcferry import WxMsg
 
+import plugins
 from Configuration import config
 from plugins import init
 from suswx import ProcessMsgFunc
@@ -32,7 +33,7 @@ class Administrator(object):
   /disable|enable name1[,name2[...]] func1[,func2[...]] 开启|禁止某人某功能权限
   /start|stop func1[,func2[,func3[...]] 开启|停止功能
   /admin name 转移管理员身份
-  /config 重新加载配置文件(暂时没用)"""
+  /config 重新加载配置文件"""
 
     def __call__(self, msg: WxMsg) -> None:
         """
@@ -46,8 +47,12 @@ class Administrator(object):
             wcf.send_text("  STATE" + "".join(
                 (f"\n- {i.name}: {'enable' if i.enable else 'disable'}" for i in funcs if i.name not in special_func)
             ), botadmin.wxid)
-        elif msg.content == "/config":  # TODO Sync configuration
+        elif msg.content == "/config":
             config.load_config()
+            plugins.load()
+            for f in config["plugins"]["info"]:
+                registry[f].access = set(config["plugins"]["info"][f]["access"])
+                registry[f].enable = set(config["plugins"]["info"][f]["enable"])
             wcf.send_text("Configuration reloaded", botadmin.wxid)
         elif c := re.fullmatch("/admin (.*?)", msg.content):
             admin_name: str = c.groups()[0]

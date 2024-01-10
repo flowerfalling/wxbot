@@ -3,8 +3,6 @@
 # @Author  : 之落花--falling_flowers
 # @File    : SusRobot.py
 # @Software: PyCharm
-import logging
-
 import plugins
 from suswx.bot import robot
 
