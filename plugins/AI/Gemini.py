@@ -3,6 +3,8 @@
 # @Author  : 之落花--falling_flowers
 # @File    : Gemini.py
 # @Software: PyCharm
+import asyncio
+
 import google.api_core.exceptions
 import google.auth.exceptions
 import google.generativeai as genai
@@ -36,10 +38,10 @@ class Gemini(AI):
     async def _ai_response(self, content: str, sender: str, user_info: "Gemini._GeminiInfo") -> None:
         resp: str = "something wents wrong"
         try:
-            response: genai.types.AsyncGenerateContentResponse = await user_info.chat.send_message_async(
-                content=content[int(not user_info.state):])
+            response: genai.types.AsyncGenerateContentResponse = await asyncio.wait_for(
+                user_info.chat.send_message_async(content=content[int(not user_info.state):]), 20)
             wcf.send_text(resp := "[Gemini]%s" % response.text, sender)
-        except google.api_core.exceptions.GoogleAPIError:
+        except (google.api_core.exceptions.GoogleAPIError, asyncio.TimeoutError):
             wcf.send_text(resp := "Sorry, Gemini's answer timed out", sender)
         except (google.generativeai.types.BlockedPromptException,
                 google.generativeai.types.generation_types.StopCandidateException) as e:

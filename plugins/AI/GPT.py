@@ -3,11 +3,11 @@
 # @Author  : 之落花--falling_flowers
 # @File    : GPT.py
 # @Software: PyCharm
+import asyncio
 import json
 from typing import Optional
 
 import aiohttp
-import requests
 from wcferry import WxMsg
 
 from plugins import init
@@ -48,11 +48,12 @@ class GPT(AI):
         await self._reply(msg=msg, get_default_info=lambda: GPT._GPTInfo(self.name, self.key))
 
     async def _ai_response(self, content: str, sender: str, user_info: "GPT._GPTInfo") -> None:
-        if response := await self.__get_reply(content[int(not user_info.state):], user_info):
+        try:
+            response = await asyncio.wait_for(self.__get_reply(content[int(not user_info.state):], user_info), 20)
             user_info.pmid = response["id"]
             wcf.send_text(resp := "[GPT]%s" % response["text"], sender)
             logger.info(resp)
-        else:
+        except (asyncio.TimeoutError, aiohttp.ClientError):
             wcf.send_text(resp := "Sorry, GPT's answer timed out", sender)
             logger.info(resp)
 
@@ -63,23 +64,20 @@ class GPT(AI):
         :param info: The wxid of the chat object
         :return: a tuple of pmid and response's text or None(ConnectionError or other)
         """
-        try:
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
-                async with session.post(
-                        self.__URL,
-                        headers=self.__HEADERS,
-                        json={
-                            "prompt": msg,
-                            "options": {"parentMessageId": info.pmid} if info.pmid else {},
-                            "systemMessage": self.__SYSTEM_MESSAGE,
-                            "temperature": info.temperature,
-                            "top_p": info.top_p,
-                        },
-                ) as resp:
-                    response: dict[str, str] = json.loads((await resp.text()).split("&KFw6loC9Qvy&")[-1])
-            return {"id": response["id"], "text": response["text"]}
-        except requests.exceptions.RequestException:
-            return None
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                    self.__URL,
+                    headers=self.__HEADERS,
+                    json={
+                        "prompt": msg,
+                        "options": {"parentMessageId": info.pmid} if info.pmid else {},
+                        "systemMessage": self.__SYSTEM_MESSAGE,
+                        "temperature": info.temperature,
+                        "top_p": info.top_p,
+                    },
+            ) as resp:
+                response: dict[str, str] = json.loads((await resp.text()).split("&KFw6loC9Qvy&")[-1])
+        return {"id": response["id"], "text": response["text"]}
 
     class _GPTInfo(AI.AIInfo):
         """

@@ -139,4 +139,3 @@ class AI(ABC):
                     return help_docs
                 case _:
                     return f'指令错误,可发送"{self.key}{self.name.lower()} help"获取帮助'
-
