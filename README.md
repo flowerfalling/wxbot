@@ -1,8 +1,12 @@
 # Wxbot
 
-Papersus's Wxbot is a WeChat bot with ChatGPT(only Windows)
+<p style="text-align: center">
+English | <a href="README_zh.md">简体中文</a>
+</p>
 
-WeChat robot framework and examples based on wcferry
+Papersus Wxbot is a WeChat bot with ChatGPT(only Windows)
+
+WeChat robot framework and examples based on [wcferry](https://github.com/lich0821/WeChatFerry)
 
 <details><summary>Disclaimer[mandatory reading]</summary>
 
@@ -25,7 +29,7 @@ Now the bot only supports private chats, and does not support group chats for th
 - Python `>=3.9`
 - WeChat `3.9.2.23`
 
-### Install
+### deploy
 
 ```Shell
 git clone https://github.com/flowerfalling/wxbot.git
@@ -97,13 +101,14 @@ Call any of them func
 Administrator documentation
   /help  # Get help
   /state  # View functions' status
-  /disable|enable name1[,name2[...]] func1[,func2[...]]|all  # Enable | Disable someone's permission for some|all functions
-  /start|stop func1[,func2[,func3[...]]  # Start | Stop functions
+  /config  # Reload configuration file
+  /disable|enable name1[,name2[...]] func1[,func2[...]]|all  # Enable|Disable someone's permission for some|all functions
+  /start|stop func1[,func2[,func3[...]]  # Start|Stop functions
   /admin name  # Transfer administrator's identity
   /quit  # Exit robot
 ```
 
-_Gimini is not enabled by default, please fill in the token in plugins-info-gemini-token in config.yaml and restart (then enbale it)_
+_Gimini is not enabled by default, please fill in the token in plugins-info-gemini-token in config.yaml and restart (then enbale it) or use the administrator WeChat to send /config_
 </details>
 
 ## Do not abuse gpt
