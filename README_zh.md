@@ -1,6 +1,6 @@
 # Wxbot
 
-<p style="text-align: center">
+<p align="center">
 简体中文 | <a href="README.md">English</a>
 </p>
 
