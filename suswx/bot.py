@@ -93,6 +93,8 @@ class Robot(object):
         """
         if not msg.from_group() and msg.is_text():
             logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
+        if msg.sender == botadmin.wxid and msg.content == "/quit":
+            exit(0)
         for f in registry.mt:
             if f.check(msg, self._admin.wxid):
                 self.mt_executor.submit(f.func, msg)

@@ -33,7 +33,8 @@ class Administrator(object):
   /disable|enable name1[,name2[...]] func1[,func2[...]] 开启|禁止某人某功能权限
   /start|stop func1[,func2[,func3[...]] 开启|停止功能
   /admin name 转移管理员身份
-  /config 重新加载配置文件"""
+  /config 重新加载配置文件
+  /quit 退出机器人"""
 
     def __call__(self, msg: WxMsg) -> None:
         """
