@@ -109,5 +109,5 @@ Administrator documentation
   /quit  # 退出机器人
 ```
 
-_Gimini默认不启用，请填写config.yaml中plugins-info-gemini-token并重启（然后enbale）_
+_Gimini默认不启用，请填写config.yaml中plugins-info-gemini-token后重启（然后enbale）或使用管理员微信发送/config_
 </details>
