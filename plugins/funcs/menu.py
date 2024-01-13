@@ -7,7 +7,6 @@ import wcferry
 
 from Configuration import config
 from plugins import register
-from suswx.bot import register
 from suswx.common import wcf, logger
 
 MENU = '''- /gpt help

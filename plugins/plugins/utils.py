@@ -13,7 +13,7 @@ from Configuration import config
 from suswx import ProcessMsgFunc, Content
 from suswx.Registry import func_startup_mode
 from suswx.common import logger
-from suswx.bot import register
+import suswx.bot
 
 __all__ = ["load", "register", "plugins_registry"]
 
@@ -82,7 +82,7 @@ def register(
         """
         :param func: A decorator used to register functions
         """
-        func_item: ProcessMsgFunc = register(msgType, fromFriend, fromGroup, fromAdmin, name, mode, enable, access)(func)
+        func_item: ProcessMsgFunc = suswx.bot.register(msgType, fromFriend, fromGroup, fromAdmin, name, mode, enable, access)(func)
         func_name = func_item.name
         if frozen:
             plugins_registry["frozen"].add(func_item)

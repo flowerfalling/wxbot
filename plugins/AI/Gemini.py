@@ -14,7 +14,7 @@ from wcferry import WxMsg
 from Configuration import config
 from plugins import register
 from plugins.AI.AI import AI
-from suswx.bot import register, registry
+from suswx.bot import registry
 from suswx.common import wcf, logger
 
 

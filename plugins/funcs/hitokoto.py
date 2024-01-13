@@ -3,17 +3,16 @@
 # @Author  : 之落花--falling_flowers
 # @File    : plugins.py
 # @Software: PyCharm
-import wcferry
+from wcferry import WxMsg
 
 from Configuration import config
 from plugins import register
-from suswx.bot import register
 from suswx.common import wcf, logger
 import aiohttp
 
 
 @register(fromFriend=True, mode="async")
-async def hitokoto(msg: wcferry.WxMsg) -> None:
+async def hitokoto(msg: WxMsg) -> None:
     """
     Hitokoto, represents the touch of words and the communication of souls
     """
