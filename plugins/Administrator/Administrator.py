@@ -10,16 +10,14 @@ from wcferry import WxMsg
 
 import plugins
 from Configuration import config
-from plugins import init
-from suswx import ProcessMsgFunc
-from suswx.bot import register, registry
+from plugins import register, plugins_registry
+from suswx.bot import registry
 from suswx.common import wcf, logger, botadmin
 
-__all__ = ["special_func", "admin"]
+__all__ = ["admin"]
 
 update_access_mode = Literal["enable", "disable"]
 switch_func_mode = Literal["start", "stop"]
-special_func = {"ADMIN"}
 
 
 class Administrator(object):
@@ -44,17 +42,19 @@ class Administrator(object):
         if msg.content == "/help":
             wcf.send_text(self.HELP_DOCS, botadmin.wxid)
         elif msg.content == "/state":
-            funcs: Sequence[ProcessMsgFunc] = [i for i in registry]
             wcf.send_text("  STATE" + "".join(
-                (f"\n- {i.name}: {'enable' if i.enable else 'disable'}" for i in funcs if i.name not in special_func)
+                (f"\n- {i.name}: {'enable' if i.enable else 'disable'}"
+                 for i in registry if i not in plugins_registry["frozen"])
             ), botadmin.wxid)
         elif msg.content == "/config":
             config.load_config()
             plugins.load()
-            for f in config["plugins"]["info"]:
-                registry[f].access = set(config["plugins"]["info"][f]["access"])
-                registry[f].enable = set(config["plugins"]["info"][f]["enable"])
-            wcf.send_text("Configuration reloaded", botadmin.wxid)
+            for f in plugins_registry["save"]:
+                func_info: dict = config["plugins"]["info"][f.name]
+                f.access = set(func_info["access"])
+                f.enable = func_info["enable"]
+            wcf.send_text(info := "Configuration reloaded", botadmin.wxid)
+            logger.info(info)
         elif c := re.fullmatch("/admin (.*?)", msg.content):
             admin_name: str = c.groups()[0]
             contacts: list[dict] = wcf.get_friends()
@@ -99,20 +99,18 @@ class Administrator(object):
         users -= stranger
         users_wxid = {i["wxid"] for i in contacts if i["name"] in users}
         if funcs == {"all"}:
-            funcs = registry.names
+            funcs = [i.name for i in registry if i not in plugins_registry["frozen"]]
         for f in funcs:
-            if f in special_func:
-                continue
-            if not registry[f]:
+            if not (func := registry[f]):
                 wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
                 logger.info(info)
                 continue
-            if mode == "enable":
-                registry[f].access.update(users_wxid)
-            elif mode == "disable":
-                registry[f].access.difference_update(users_wxid)
-            else:
+            if func in plugins_registry["frozen"]:
                 continue
+            if mode == "enable":
+                func.access.update(users_wxid)
+            elif mode == "disable":
+                func.access.difference_update(users_wxid)
             wcf.send_text(
                 info := f"The {f} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
                 botadmin.wxid
@@ -127,12 +125,12 @@ class Administrator(object):
         :param mode: enable/disable
         """
         for f in funcs:
-            if not registry[f]:
+            if not (func := registry[f]):
                 wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
-            elif f in special_func:
-                wcf.send_text(info := f"function ADMIN cannot be turned off", botadmin.wxid)
+            elif func in plugins_registry["frozen"]:
+                wcf.send_text(info := f"frozen function {f} cannot be turned on or off", botadmin.wxid)
             else:
-                registry[f].enable = mode == "start"
+                func.enable = mode == "start"
                 wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", botadmin.wxid)
             logger.info(info)
 
@@ -141,9 +139,7 @@ class Administrator(object):
         """
         Save the status of each function to config.yaml
         """
-        for f in registry:
-            if f.name in special_func:
-                continue
+        for f in plugins_registry["save"]:
             config["plugins"]["info"][f.name]["access"] = list(f.access)
             config["plugins"]["info"][f.name]["enable"] = f.enable
         config.save_config()
@@ -152,7 +148,6 @@ class Administrator(object):
 admin: Administrator = Administrator()
 
 
-@init(False)
-@register(fromAdmin=True, name="ADMIN", access={botadmin.wxid})
+@register(fromAdmin=True, name="ADMIN", access={botadmin.wxid}, frozen=True)
 def admin_func(msg: WxMsg) -> None:
     admin(msg)
