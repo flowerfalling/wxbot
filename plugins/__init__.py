@@ -4,10 +4,10 @@
 # @File    : __init__.py.py
 # @Software: PyCharm
 from Configuration import config
-from plugins.plugins.utils import load, init
+from plugins.plugins.utils import load, register, plugins_registry
 from schema import Schema
 
-__all__ = ["load", "init"]
+__all__ = ["load", "register", "plugins_registry"]
 
 plugins_schma = Schema({"info": dict, "list": list})
 
