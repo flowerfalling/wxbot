@@ -10,7 +10,7 @@ from typing import Optional
 import aiohttp
 from wcferry import WxMsg
 
-from plugins import init
+from plugins import register
 from plugins.AI.AI import AI
 from suswx.bot import register
 from suswx.common import wcf, logger
@@ -114,7 +114,6 @@ class GPT(AI):
 gpt_instance = GPT()
 
 
-@init()
 @register(fromFriend=True, mode="async")
 async def gpt(msg: WxMsg) -> None:
     await gpt_instance.private_reply(msg)

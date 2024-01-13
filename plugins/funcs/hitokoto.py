@@ -6,13 +6,12 @@
 import wcferry
 
 from Configuration import config
-from plugins import init
+from plugins import register
 from suswx.bot import register
 from suswx.common import wcf, logger
 import aiohttp
 
 
-@init()
 @register(fromFriend=True, mode="async")
 async def hitokoto(msg: wcferry.WxMsg) -> None:
     """

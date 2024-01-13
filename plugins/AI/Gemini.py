@@ -12,7 +12,7 @@ from schema import Schema
 from wcferry import WxMsg
 
 from Configuration import config
-from plugins import init
+from plugins import register
 from plugins.AI.AI import AI
 from suswx.bot import register, registry
 from suswx.common import wcf, logger
@@ -88,7 +88,6 @@ if not gemini_schma.is_valid(config["plugins"]["info"]["gemini"]):
 gemini_instance = Gemini()
 
 
-@init()
 @register(fromFriend=True, enable=False, mode="async")
 async def gemini(msg: WxMsg) -> None:
     await gemini_instance.private_reply(msg)

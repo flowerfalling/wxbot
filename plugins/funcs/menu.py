@@ -6,7 +6,7 @@
 import wcferry
 
 from Configuration import config
-from plugins import init
+from plugins import register
 from suswx.bot import register
 from suswx.common import wcf, logger
 
@@ -16,7 +16,6 @@ MENU = '''- /gpt help
 - @菜单'''
 
 
-@init()
 @register(fromFriend=True)
 def menu(msg: wcferry.WxMsg) -> None:
     """
