@@ -108,7 +108,7 @@ Administrator documentation
   /quit  # Exit robot
 ```
 
-_Gimini is not enabled by default, please fill in the token in plugins-info-gemini-token in config.yaml then restart (then enbale it) or use the administrator WeChat to send /config_
+_Gimini is not enabled by default, please fill in the token in plugins-info-gemini-token in config.yaml then restart (then enbale it)_
 </details>
 
 ## Do not abuse gpt
