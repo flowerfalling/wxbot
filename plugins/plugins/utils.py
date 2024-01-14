@@ -92,7 +92,7 @@ def register(
             if save_config:
                 plugins_registry["save"].add(func_item)
                 if config["plugins"]["info"].get(func_name) is None:
-                    config["plugins"]["info"][func_name] = {"access": [], "enable": False}
+                    config["plugins"]["info"][func_name] = {"access": [], "enable": func_item.enable}
                     config.save_config()
                 func_item.access.update(set(config["plugins"]["info"][func_name]["access"]))
                 func_item.enable = config["plugins"]["info"][func_name]["enable"]

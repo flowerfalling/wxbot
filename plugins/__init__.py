@@ -17,5 +17,5 @@ def init_plugins_config():
     config.save_config()
 
 
-if "plugins" not in config.config or not plugins_schma.is_valid(config.config["plugins"]):
+if not config["plugins"] or not plugins_schma.is_valid(config.config["plugins"]):
     init_plugins_config()
