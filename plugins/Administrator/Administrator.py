@@ -113,11 +113,12 @@ class Administrator(object):
             elif mode == "disable":
                 func.access.difference_update(users_wxid)
             func_names.append(f)
-        wcf.send_text(
-            info := f"The {func_names} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
-            botadmin.wxid
-        )
-        logger.info(info)
+        if func_names:
+            wcf.send_text(
+                info := f"The {func_names} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
+                botadmin.wxid
+            )
+            logger.info(info)
 
     @staticmethod
     def switch_func(funcs: Sequence[str], mode: switch_func_mode) -> None:
