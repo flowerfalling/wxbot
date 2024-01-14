@@ -5,3 +5,4 @@ logs
 .wcf.lock
 demo
 config.yaml
+resource/image/*.jpeg
