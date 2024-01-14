@@ -16,13 +16,7 @@ async def hitokoto(msg: WxMsg) -> None:
     """
     Hitokoto, represents the touch of words and the communication of souls
     """
-    if all(
-            (
-                    msg.sender in config["plugins"]["info"]["hitokoto"]["access"],
-                    config["plugins"]["info"]["hitokoto"]["enable"],
-                    msg.content == "@一言",
-            )
-    ):
+    if msg.content == "@一言":
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
             async with session.get("https://v1.hitokoto.cn") as resp:
                 r = await resp.json()

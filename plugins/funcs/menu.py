@@ -20,12 +20,6 @@ def menu(msg: wcferry.WxMsg) -> None:
     """
     function list
     """
-    if all(
-            (
-                    msg.sender in config["plugins"]["info"]["menu"]["access"],
-                    config["plugins"]["info"]["menu"]["enable"],
-                    msg.content == "@菜单",
-            )
-    ):
+    if msg.content == "@菜单":
         wcf.send_text(MENU, msg.sender)
         logger.info("send menu message")
