@@ -1,10 +1,10 @@
-# Plugin Development Guide
+# 插件开发指南
 
 <p align="center">
-English | <a href="README_zh.md">简体中文</a>
+简体中文 | <a href="README.md">English</a>
 </p>
 
-## Example
+## 示例
 
 ```python
 import asyncio
@@ -31,7 +31,7 @@ async def hitokoto(msg: WxMsg) -> None:
     logger.info(info)
 ```
 
-## Detail
+## 详细
 
 ```python
 from typing import Callable, Optional
@@ -59,14 +59,14 @@ def register(
     ...
 ```
 
-- msgType: a tuple of Message types allowed to be processed
-- fromFriend: Whether to handle messages from friends
-- fromGroup: Whether to handle messages from groups
-- fromAdmin: Whether to handle messages from the admin
-- name: Function name (Optional, default is function name)
-- mode: Function startup method (multithreaded "mt" or asynchronous "async")
-- enable: Whether to enable
-- access: The set of wxids of allowed message senders(Optional)
-- check: Other sequence of methods to check whether the message meets the conditions
-- frozen: Whether to freeze this function (cannot be modified)
-- save_config: Whether to set default configuration, including access and enable, and will be written to config.yaml
+- msgType: 接受的消息类型的元组, 默认为仅文本
+- fromFriend: 是否接收来自朋友的信息
+- fromGroup: 是否接收来自群聊的信息
+- fromAdmin: 是否接收来自管理员的信息
+- name: 功能名称, 默认为函数名, 是功能的唯一标识, 不可重复
+- mode: 启动方式, "mt"为线程池运行, "async"为异步运行(函数必须为异步函数)
+- enable: 是否开启功能
+- access: 白名单(微信号元组, 若元组中含"ALL"则全部通过)
+- check: 其他检查消息是否符合功能要求的方法序列, 方法将在主线程运行(一些简单的判断尽量写在这里, 可减少线程池资源消耗)
+- frozen: 是否冻结功能, 设置为True则管理员无法更改功能状态参数
+- save_config: 是否在config.yaml中创建条目来保存功能状态信息(enable和access), 若已存在条目则会加载

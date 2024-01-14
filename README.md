@@ -114,3 +114,7 @@ _Gimini is not enabled by default, please fill in the token in plugins-info-gemi
 ## Do not abuse gpt
 
 I **picked up** this gpt API, so it could have serious consequences if misused
+
+## Plugin development
+
+See at [Plugin Development Guide](./plugins/README.md)

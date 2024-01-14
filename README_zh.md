@@ -114,3 +114,7 @@ Administrator documentation
 
 _Gimini默认不启用，请填写config.yaml中plugins-info-gemini-token后重启（然后enbale）或使用管理员微信发送/config_
 </details>
+
+## 插件开发
+
+见[插件开发指南](./plugins/README_zh.md)
