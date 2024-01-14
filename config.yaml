@@ -1,0 +1,6 @@
+plugins:
+  info: {}
+  list:
+  - Administrator
+  - AI
+  - funcs
