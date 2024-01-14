@@ -12,7 +12,9 @@ MENU = '''- /gpt help
 - %gemini help
 - @一言
 - @菜单
-- @历史上的今天'''
+- @历史上的今天
+- @微博/知乎热搜
+- @星座运势 xxx'''
 
 
 @register(fromFriend=True, check=[lambda msg: msg.content == "@菜单"])
