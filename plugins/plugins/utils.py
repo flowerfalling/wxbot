@@ -53,7 +53,7 @@ def register(
         mode: func_startup_mode = "mt",
         enable: bool = True,
         access: Optional[set] = None,
-        check: Sequence[Callable[[WxMsg], None]] = None,
+        check: Sequence[Callable[[WxMsg], bool]] = None,
         frozen: bool = False,
         save_config: bool = True
 ) -> Callable[[Callable[[WxMsg], None]], None]:
