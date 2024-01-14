@@ -33,6 +33,8 @@ class Configuration(object):
             open(self.config_path, "w+").close()
         with open(self.config_path, encoding='utf-8') as f:
             self.config = yaml.safe_load(f)
+        if self.config is None:
+            self.config = {}
 
     def save_config(self) -> None:
         """
