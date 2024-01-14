@@ -3,14 +3,13 @@
 # @Author  : 之落花--falling_flowers
 # @File    : AI.py
 # @Software: PyCharm
-import time
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 from typing import TypeVar
 
 import wcferry
 
-from Configuration import config
 from suswx.common import wcf
 
 T: type = TypeVar('T', bound="AI.AIInfo")
@@ -47,9 +46,6 @@ class AI(ABC):
     ) -> None:
         sender: str = msg.sender
         ai_name, ai_key = self.name, self.key
-        config_ai: dict = config["plugins"]["info"][ai_name.lower()]
-        if sender not in config_ai["access"] or not config_ai["enable"]:
-            return
         user_info: T = self.__info.setdefault(sender, get_default_info())
         content: str = msg.content
         if content.startswith(ai_key + ai_name.lower()):
@@ -58,7 +54,7 @@ class AI(ABC):
         if user_info.state or content.startswith(ai_key):
             if user_info.waiting:
                 while user_info.waiting:
-                    time.sleep(0.5)
+                    await asyncio.sleep(0.5)
             user_info.wait()
             await self._ai_response(content, sender, user_info)
             user_info.wake()

@@ -5,7 +5,7 @@
 # @Software: PyCharm
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 
 from wcferry import WxMsg
 
@@ -28,7 +28,8 @@ def register(
         name: Optional[str] = None,
         mode: func_startup_mode = "mt",
         enable: bool = True,
-        access: Optional[set] = None
+        access: Optional[set] = None,
+        check: Sequence[Callable[[WxMsg], bool]] = None
 ) -> Callable[[Callable[[WxMsg], None]], ProcessMsgFunc]:
     """
     Register a function in the registry, usually used as a decorator
@@ -40,10 +41,14 @@ def register(
     :param mode: Function startup method (multithreaded "mt" or asynchronous "async")
     :param enable: Whether to enable
     :param access: The set of wxids of allowed message senders(Optional)
+    :param check: Other sequence of methods to check whether the message meets the conditions
     :return: A decorator used to register functions
     """
     if access is None:
         access = set()
+    if check is None:
+        check = []
+    check = list(check)
 
     def inner(func: Callable[[WxMsg], None]) -> ProcessMsgFunc:
         """
@@ -52,7 +57,7 @@ def register(
         """
         func_name: str = name if name is not None else func.__name__
         process_func: ProcessMsgFunc = ProcessMsgFunc(
-            func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode, enable, access)
+            func, func_name, msgType, fromFriend, fromGroup, fromAdmin, mode, enable, access, check)
         registry.add(process_func)
         return process_func
 

@@ -3,22 +3,26 @@
 # @Author  : 之落花--falling_flowers
 # @File    : plugins.py
 # @Software: PyCharm
+import asyncio
+
+import aiohttp
 from wcferry import WxMsg
 
-from Configuration import config
 from plugins import register
 from suswx.common import wcf, logger
-import aiohttp
 
 
-@register(fromFriend=True, mode="async")
+@register(fromFriend=True, mode="async", check=[lambda msg: msg.content == "@一言"])
 async def hitokoto(msg: WxMsg) -> None:
     """
     Hitokoto, represents the touch of words and the communication of souls
     """
-    if msg.content == "@一言":
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
+    try:
+        async with aiohttp.ClientSession() as session:
             async with session.get("https://v1.hitokoto.cn") as resp:
-                r = await resp.json()
+                r = await asyncio.wait_for(resp.json(), timeout=5)
                 wcf.send_text(info := f'{r["hitokoto"]}\n----{r["from"]}[{r["from_who"]}]', msg.sender)
-                logger.info(info)
+    except asyncio.TimeoutError:
+        wcf.send_text(info := "Sorry, hitokoto timed out", msg.sender)
+    logger.info(info)
+

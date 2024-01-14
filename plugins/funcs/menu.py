@@ -5,7 +5,6 @@
 # @Software: PyCharm
 import wcferry
 
-from Configuration import config
 from plugins import register
 from suswx.common import wcf, logger
 
@@ -15,11 +14,10 @@ MENU = '''- /gpt help
 - @菜单'''
 
 
-@register(fromFriend=True)
+@register(fromFriend=True, check=[lambda msg: msg.content == "@菜单"])
 def menu(msg: wcferry.WxMsg) -> None:
     """
     function list
     """
-    if msg.content == "@菜单":
-        wcf.send_text(MENU, msg.sender)
-        logger.info("send menu message")
+    wcf.send_text(MENU, msg.sender)
+    logger.info("send menu message")

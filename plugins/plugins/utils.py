@@ -4,7 +4,7 @@
 # @File    : utils.py
 # @Software: PyCharm
 from types import ModuleType
-from typing import Callable, Literal, Optional
+from typing import Callable, Literal, Optional, Sequence
 
 from schema import Schema
 from wcferry import WxMsg
@@ -53,12 +53,13 @@ def register(
         mode: func_startup_mode = "mt",
         enable: bool = True,
         access: Optional[set] = None,
+        check: Sequence[Callable[[WxMsg], None]] = None,
         frozen: bool = False,
         save_config: bool = True
 ) -> Callable[[Callable[[WxMsg], None]], None]:
     # noinspection PyUnresolvedReferences
     """
-        This registration method is a wrapper for suswx.bot's registration method, allowing users to create configurations in configuration files or prohibiting administrators from changing the method.
+        This registration method is a wrapper for suswx.bot.register, allowing users to create configurations in configuration files or prohibiting administrators from changing the method.
         You can use this function like this:
 
         >>> @plugins.register(save_config=True)
@@ -73,6 +74,7 @@ def register(
         :param mode: Function startup method (multithreaded "mt" or asynchronous "async")
         :param enable: Whether to enable
         :param access: The set of wxids of allowed message senders(Optional)
+        :param check: Other sequence of methods to check whether the message meets the conditions
         :param frozen: Whether to freeze this function (cannot be modified)
         :param save_config: Whether to set default configuration, including access and enable, and will be written to config.yaml
         :return: A decorator used to register functions
@@ -82,7 +84,7 @@ def register(
         """
         :param func: A decorator used to register functions
         """
-        func_item: ProcessMsgFunc = suswx.bot.register(msgType, fromFriend, fromGroup, fromAdmin, name, mode, enable, access)(func)
+        func_item: ProcessMsgFunc = suswx.bot.register(msgType, fromFriend, fromGroup, fromAdmin, name, mode, enable, access, check)(func)
         func_name = func_item.name
         if frozen:
             plugins_registry["frozen"].add(func_item)

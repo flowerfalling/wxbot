@@ -26,6 +26,7 @@ class ProcessMsgFunc(object):
             mode: func_startup_mode,
             enable: bool,
             access: set,
+            check: list[Callable[[WxMsg], bool]],
     ) -> None:
         """
         Message processing functions within the registry
@@ -38,6 +39,7 @@ class ProcessMsgFunc(object):
         :param mode: Function startup method (multithreaded "mt" or asynchronous "async")
         :param enable: Whether to enable
         :param access: The set of wxids of allowed message senders
+        :param check: Other sequence of methods to check whether the message meets the conditions
         """
         self.func: Callable[[WxMsg], None] = func
         self.name: str = name
@@ -48,7 +50,8 @@ class ProcessMsgFunc(object):
         self.match: list = [self.fromfriend, self.fromgroup, self.fromadmin]
         self.mode: func_startup_mode = mode
         self.enable: bool = enable
-        self.access = access
+        self.access: set[str] = access
+        self.check_funcs: list[Callable[[WxMsg], bool]] = check
 
     def check(self, msg: WxMsg, admin: str) -> bool:
         """
@@ -66,7 +69,7 @@ class ProcessMsgFunc(object):
                 msg.type in self.msgtype,
                 [i and j for (i, j) in zip(source, self.match)] == self.match,
                 msg.sender in self.access or "ALL" in self.access
-        )):
+        )) and all((c(msg) for c in self.check_funcs)):
             return True
         return False
 
