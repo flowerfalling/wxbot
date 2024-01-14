@@ -26,7 +26,7 @@ Now the bot only supports private chats, and does not support group chats for th
 
 ### Environment
 
-- Python `>=3.9`
+- Python `>=3.10`
 - WeChat `3.9.2.23`
 
 ### deploy
@@ -55,6 +55,12 @@ python SusRobot.py
 
 # To stop, press Ctrl+C
 ```
+
+_Please use the administrator to set users who allow the bot function to reply, see details below (/enable)_
+
+The administrator(the default is wechat for bot login) sends `/enable username all` in the WeChat private message to enable all functions for the specified user.
+
+The user sends `@menu` to get the function list and use the function
 
 <details><summary>Feature</summary>
 

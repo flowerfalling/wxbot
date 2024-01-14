@@ -28,7 +28,7 @@ Papersus Wxbot 是一个带有 ChatGPT 的微信机器人（仅限 Windows）
 
 ### 环境
 
-- Python `>=3.9`
+- Python `>=3.10`
 - WeChat `3.9.2.23`
 
 ### 部署
@@ -56,6 +56,12 @@ python SusRobot.py
 
 # 要停止，请按 Ctrl+C
 ```
+
+_请使用管理员设置允许bot功能回复的用户,见下详情中/enable_
+
+管理员(默认为bot登录的微信)在微信私信中发送`/enable username all`为指定用户启用所有功能
+
+用户发送`@菜单`获取功能列表并使用功能
 
 <details><summary>详情</summary>
 
