@@ -6,7 +6,19 @@ English | <a href="README_zh.md">简体中文</a>
 
 ## Example
 
+1. Create a python package in the plugins directory, here named **funcs**
+2. Create the required module in funcs, here named **hitokoto**
+3. Register the function **hitokoto** in hitokoto.py
+4. Add hitokoto record in \_\_all\_\_ of plugins\\funcs\\_\_init\_\_.py
+5. Add this python **package name** to the **plugins-list** entry in **config.yaml**
+
 ```python
+# plugins\\funcs\\__init__.py
+__all__ = ["hitokoto"]
+```
+
+```python
+# plugins\\funcs\\hitokoto.py
 import asyncio
 
 import aiohttp
@@ -29,6 +41,14 @@ async def hitokoto(msg: WxMsg) -> None:
     except asyncio.TimeoutError:
         wcf.send_text(info := "Sorry, hitokoto timed out", msg.sender)
     logger.info(info)
+```
+
+```yaml
+# config.yaml
+plugins:
+  info: {}
+  list:
+  - funcs
 ```
 
 ## Detail

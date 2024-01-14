@@ -6,11 +6,11 @@
 
 ## 示例
 
-1. 在plugins目录下创建一个python包,此处为funcs
-2. 在funcs中创建所需的module,此处名为hitokoto
-3. 在hitokoto.py中注册功能hitokoto
+1. 在plugins目录下创建一个python包,此处为**funcs**
+2. 在funcs中创建所需的module,此处名为**hitokoto**
+3. 在hitokoto.py中注册功能**hitokoto**
 4. 在plugins\\funcs\\\_\_init\_\_.py的__all__中添加hitokoto的记录
-5. 在config.yaml中的plugins.list条目中添加此python包名
+5. 在**config.yaml**中的**plugins-list**条目中添加此python**包名**
 
 ```python
 # plugins\\funcs\\__init__.py
@@ -41,6 +41,14 @@ async def hitokoto(msg: WxMsg) -> None:
     except asyncio.TimeoutError:
         wcf.send_text(info := "Sorry, hitokoto timed out", msg.sender)
     logger.info(info)
+```
+
+```yaml
+# config.yaml
+plugins:
+  info: {}
+  list:
+  - funcs
 ```
 
 ## 详细
