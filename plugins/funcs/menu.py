@@ -11,7 +11,8 @@ from suswx.common import wcf, logger
 MENU = '''- /gpt help
 - %gemini help
 - @一言
-- @菜单'''
+- @菜单
+- @历史上的今天'''
 
 
 @register(fromFriend=True, check=[lambda msg: msg.content == "@菜单"])
