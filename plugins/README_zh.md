@@ -6,7 +6,19 @@
 
 ## 示例
 
+1. 在plugins目录下创建一个python包,此处为funcs
+2. 在funcs中创建所需的module,此处名为hitokoto
+3. 在hitokoto.py中注册功能hitokoto
+4. 在plugins\\funcs\\\_\_init\_\_.py的__all__中添加hitokoto的记录
+5. 在config.yaml中的plugins.list条目中添加此python包名
+
 ```python
+# plugins\\funcs\\__init__.py
+__all__ = ["hitokoto"]
+```
+
+```python
+# plugins\\funcs\\hitokoto.py
 import asyncio
 
 import aiohttp
