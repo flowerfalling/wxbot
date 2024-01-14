@@ -14,9 +14,9 @@ from wcferry import WxMsg
 from plugins import register
 from suswx.common import wcf, logger
 
-if os.path.exists("./resource"):
+if not os.path.exists("./resource"):
     os.mkdir("./resource")
-if os.path.exists("./resource/image"):
+if not os.path.exists("./resource/image"):
     os.mkdir("./resource/image")
 
 
