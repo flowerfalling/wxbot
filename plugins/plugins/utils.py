@@ -15,7 +15,7 @@ from suswx.Registry import func_startup_mode
 from suswx.common import logger
 import suswx.bot
 
-__all__ = ["load", "register", "plugins_registry"]
+__all__ = ["load", "register", "plugins_registry", "save_func_config"]
 
 plugin_config_schma = Schema({"access": list, "enable": bool})
 pfunc_mode = Literal["frozen", "save"]
@@ -94,7 +94,18 @@ def register(
                 if config["plugins"]["info"].get(func_name) is None:
                     config["plugins"]["info"][func_name] = {"access": [], "enable": False}
                     config.save_config()
-                func_item.access = set(config["plugins"]["info"][func_name]["access"])
+                func_item.access.update(set(config["plugins"]["info"][func_name]["access"]))
                 func_item.enable = config["plugins"]["info"][func_name]["enable"]
+                save_func_config()
 
     return inner
+
+
+def save_func_config() -> None:
+    """
+    Save the status of each function to config.yaml
+    """
+    for f in plugins_registry["save"]:
+        config["plugins"]["info"][f.name]["access"] = list(f.access)
+        config["plugins"]["info"][f.name]["enable"] = f.enable
+    config.save_config()

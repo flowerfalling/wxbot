@@ -17,7 +17,7 @@ MENU = '''- /gpt help
 - @星座运势 xxx'''
 
 
-@register(fromFriend=True, check=[lambda msg: msg.content == "@菜单"])
+@register(fromFriend=True, check=[lambda msg: msg.content == "@菜单"], access={"ALL"})
 def menu(msg: wcferry.WxMsg) -> None:
     """
     function list

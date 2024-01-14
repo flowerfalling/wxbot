@@ -10,7 +10,7 @@ from wcferry import WxMsg
 
 import plugins
 from Configuration import config
-from plugins import register, plugins_registry
+from plugins import register, plugins_registry, save_func_config
 from suswx.bot import registry
 from suswx.common import wcf, logger, botadmin
 
@@ -81,7 +81,7 @@ class Administrator(object):
             mode: switch_func_mode = command[0]
             funcs: list[str] = command[1].split(",")
             self.switch_func(funcs, mode)
-        self.save_config()
+        save_func_config()
 
     @staticmethod
     def update_access(users: set[str], funcs: set[str], mode: update_access_mode) -> None:
@@ -100,6 +100,7 @@ class Administrator(object):
         users_wxid = {i["wxid"] for i in contacts if i["name"] in users}
         if funcs == {"all"}:
             funcs = [i.name for i in registry if i not in plugins_registry["frozen"]]
+        func_names = []
         for f in funcs:
             if not (func := registry[f]):
                 wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
@@ -111,11 +112,12 @@ class Administrator(object):
                 func.access.update(users_wxid)
             elif mode == "disable":
                 func.access.difference_update(users_wxid)
-            wcf.send_text(
-                info := f"The {f} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
-                botadmin.wxid
-            )
-            logger.info(info)
+            func_names.append(f)
+        wcf.send_text(
+            info := f"The {func_names} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
+            botadmin.wxid
+        )
+        logger.info(info)
 
     @staticmethod
     def switch_func(funcs: Sequence[str], mode: switch_func_mode) -> None:
@@ -133,16 +135,6 @@ class Administrator(object):
                 func.enable = mode == "start"
                 wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", botadmin.wxid)
             logger.info(info)
-
-    @staticmethod
-    def save_config() -> None:
-        """
-        Save the status of each function to config.yaml
-        """
-        for f in plugins_registry["save"]:
-            config["plugins"]["info"][f.name]["access"] = list(f.access)
-            config["plugins"]["info"][f.name]["enable"] = f.enable
-        config.save_config()
 
 
 admin: Administrator = Administrator()
