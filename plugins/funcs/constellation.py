@@ -29,6 +29,9 @@ async def constellation(msg: WxMsg) -> None:
                     async with aiofiles.open(f"{os.getcwd()}\\resource\\image\\{c}.jpeg", "wb") as f:
                         await f.write(await resp.read())
                     wcf.send_image(f"{os.getcwd()}\\resource\\image\\{c}.jpeg", msg.sender)
+                    info = "send image successfully"
         except asyncio.TimeoutError:
             wcf.send_text(info := "Sorry, hot search timed out", msg.sender)
-            logger.info(info)
+    else:
+        wcf.send_text(info := "输入错误(eg.@星座运势 水瓶座)", msg.sender)
+    logger.info(info)
