@@ -63,10 +63,10 @@ python SusRobot.py
 
 ```Text
 @菜单  # 获取菜单
-```
-
-```Text
 @一言  # 得到一个句子
+@历史上的今天  # 获取历史上今天的十个事件
+@微博/知乎热搜  # 获取微博/知乎十大热搜
+@星座运势 xxx  # 获取今天的星座运势
 ```
 
 ```Text
@@ -95,8 +95,11 @@ gemini command:
 - gpt
 - gemini
 - hitokoto
+- history
+- hot_search
+- constellation
 
-称其中任意一个 func
+称其中任意一个为func
 
 ```Text
 Administrator documentation

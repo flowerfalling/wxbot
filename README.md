@@ -62,10 +62,10 @@ python SusRobot.py
 
 ```Text
 @菜单  # get the menu
-```
-
-```Text
 @一言  # get a sentence
+@历史上的今天  # get ten events from today in history
+@微博/知乎热搜  # get the ten hot searches on Weibo/Zhihu
+@星座运势 xxx  # get today's horoscope picture
 ```
 
 ```Text
