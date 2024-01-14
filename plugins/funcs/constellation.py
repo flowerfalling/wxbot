@@ -14,6 +14,11 @@ from wcferry import WxMsg
 from plugins import register
 from suswx.common import wcf, logger
 
+if os.path.exists("./resource"):
+    os.mkdir("./resource")
+if os.path.exists("./resource/image"):
+    os.mkdir("./resource/image")
+
 
 @register(fromFriend=True, mode="async", check=[lambda msg: msg.content.startswith("@星座运势")])
 async def constellation(msg: WxMsg) -> None:
