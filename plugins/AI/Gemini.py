@@ -25,7 +25,6 @@ class Gemini(AI):
 
     def __init__(self) -> None:
         super().__init__("Gemini", "%")
-        genai.configure(api_key=config["plugins"]["info"]["gemini"]["token"])
         self.__model: genai.GenerativeModel = genai.GenerativeModel('gemini-pro')
 
     async def private_reply(self, msg: WxMsg) -> None:
@@ -79,15 +78,17 @@ class Gemini(AI):
             )
 
 
-gemini_schma = Schema({"access": list, "enable": bool, "token": str})
-
-if not gemini_schma.is_valid(config["plugins"]["info"]["gemini"]):
-    config["plugins"]["info"]["gemini"]["token"] = ""
-    config.save_config()
-
 gemini_instance = Gemini()
 
 
 @register(fromFriend=True, enable=False, mode="async")
 async def gemini(msg: WxMsg) -> None:
     await gemini_instance.private_reply(msg)
+
+gemini_schma = Schema({"access": list, "enable": bool, "token": str})
+
+if not gemini_schma.is_valid(config["plugins"]["info"]["gemini"]):
+    config["plugins"]["info"]["gemini"]["token"] = ""
+    config.save_config()
+
+genai.configure(api_key=config["plugins"]["info"]["gemini"]["token"])
