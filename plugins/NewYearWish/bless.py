@@ -13,7 +13,7 @@ from suswx.common import wcf, logger
 
 
 def check(msg: wcferry.WxMsg) -> bool:
-    for c in ("新年", "快乐", "春节", "安康", "出息", "龙年", "吉祥", "开心", "祝", "福", "新的一年", 'happy', 'year'):
+    for c in ("新年", "快乐", "春节", "安康", "除夕", "龙年", "过年", "吉祥", "开心", "祝", "福", "新的一年", 'happy', 'year'):
         if c in msg.content.lower():
             return True
     return False
