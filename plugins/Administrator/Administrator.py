@@ -12,7 +12,7 @@ import plugins
 from Configuration import config
 from plugins import register, plugins_registry, save_func_config
 from suswx.bot import registry
-from suswx.common import wcf, logger, botadmin
+from suswx.common import wcf, logger, bot_admin
 
 __all__ = ["admin"]
 
@@ -40,12 +40,12 @@ class Administrator(object):
         :param msg: the command message
         """
         if msg.content == "/help":
-            wcf.send_text(self.HELP_DOCS, botadmin.wxid)
+            wcf.send_text(self.HELP_DOCS, bot_admin.wxid)
         elif msg.content == "/state":
             wcf.send_text("  STATE" + "".join(
                 (f"\n- {i.name}: {'enable' if i.enable else 'disable'}"
                  for i in registry if i not in plugins_registry["frozen"])
-            ), botadmin.wxid)
+            ), bot_admin.wxid)
         elif msg.content == "/config":
             config.load_config()
             plugins.load()
@@ -53,7 +53,7 @@ class Administrator(object):
                 func_info: dict = config["plugins"]["info"][f.name]
                 f.access = set(func_info["access"])
                 f.enable = func_info["enable"]
-            wcf.send_text(info := "Configuration reloaded", botadmin.wxid)
+            wcf.send_text(info := "Configuration reloaded", bot_admin.wxid)
             logger.info(info)
         elif c := re.fullmatch("/admin (.*?)", msg.content):
             admin_name: str = c.groups()[0]
@@ -62,13 +62,13 @@ class Administrator(object):
             new_admin = list(filter(lambda i: i["name"] == admin_name, contacts))
             if len(new_admin) == 1:
                 config["administrator"]["name"] = new_admin[0]["name"]
-                botadmin.wxid = config["administrator"]["wxid"] = new_admin[0]["wxid"]
-                registry["ADMIN"].access = {botadmin.wxid}
+                bot_admin.wxid = config["administrator"]["wxid"] = new_admin[0]["wxid"]
+                registry["ADMIN"].access = {bot_admin.wxid}
                 wcf.send_text(info := f"Administrator rights have been transferred to user {admin_name}", msg.sender)
             elif len(new_admin) == 0:
-                wcf.send_text(info := f"You do not have a user named {admin_name}, please check the username", botadmin.wxid)
+                wcf.send_text(info := f"You do not have a user named {admin_name}, please check the username", bot_admin.wxid)
             else:
-                wcf.send_text(info := f"You have more than one friend named {admin_name}. Please make sure the username of the user you want to transfer administrator rights to is unique.", botadmin.wxid)
+                wcf.send_text(info := f"You have more than one friend named {admin_name}. Please make sure the username of the user you want to transfer administrator rights to is unique.", bot_admin.wxid)
             logger.info(info)
         elif c := re.fullmatch("/(enable|disable) (.*?) (.*?)", msg.content):
             command: tuple = c.groups()
@@ -94,7 +94,7 @@ class Administrator(object):
         contacts: list[dict] = wcf.get_friends()
         contacts.append(wcf.get_info_by_wxid(wcf.get_self_wxid()))
         if stranger := users - {i['name'] for i in contacts}:
-            wcf.send_text(info := f"{stranger} are not your friends, please check the username", botadmin.wxid)
+            wcf.send_text(info := f"{stranger} are not your friends, please check the username", bot_admin.wxid)
             logger.info(info)
         users -= stranger
         users_wxid = {i["wxid"] for i in contacts if i["name"] in users}
@@ -103,7 +103,7 @@ class Administrator(object):
         func_names = []
         for f in funcs:
             if not (func := registry[f]):
-                wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
+                wcf.send_text(info := f"function {f} does not exist", bot_admin.wxid)
                 logger.info(info)
                 continue
             if func in plugins_registry["frozen"]:
@@ -116,7 +116,7 @@ class Administrator(object):
         if func_names:
             wcf.send_text(
                 info := f"The {func_names} access has been turned {'on' if mode == 'enable' else 'off'} for user {users}",
-                botadmin.wxid
+                bot_admin.wxid
             )
             logger.info(info)
 
@@ -129,18 +129,18 @@ class Administrator(object):
         """
         for f in funcs:
             if not (func := registry[f]):
-                wcf.send_text(info := f"function {f} does not exist", botadmin.wxid)
+                wcf.send_text(info := f"function {f} does not exist", bot_admin.wxid)
             elif func in plugins_registry["frozen"]:
-                wcf.send_text(info := f"frozen function {f} cannot be turned on or off", botadmin.wxid)
+                wcf.send_text(info := f"frozen function {f} cannot be turned on or off", bot_admin.wxid)
             else:
                 func.enable = mode == "start"
-                wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", botadmin.wxid)
+                wcf.send_text(info := f"{f} has been turned {'on' if mode == 'start' else 'off'}", bot_admin.wxid)
             logger.info(info)
 
 
 admin: Administrator = Administrator()
 
 
-@register(fromAdmin=True, name="ADMIN", access={botadmin.wxid}, frozen=True)
+@register(fromAdmin=True, name="ADMIN", access={bot_admin.wxid}, frozen=True)
 def admin_func(msg: WxMsg) -> None:
     admin(msg)

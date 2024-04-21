@@ -5,6 +5,7 @@
 # @Software: PyCharm
 import asyncio
 import random
+import re
 
 import wcferry
 
@@ -12,12 +13,12 @@ from plugins import register
 from plugins.NewYearWish.blessings import blessings
 from suswx.common import wcf, logger
 
+match = ("新年", "快乐", "春节", "安康", "除夕", "龙年", "过年", "吉祥", "开心", "祝", "福", "新的一年", 'happy', 'year')
+
 
 def check(msg: wcferry.WxMsg) -> bool:
-    for c in (
-    "新年", "快乐", "春节", "安康", "除夕", "龙年", "过年", "吉祥", "开心", "祝", "福", "新的一年", 'happy', 'year'):
-        if c in msg.content.lower():
-            return True
+    if re.match(f"^.*?{'|'.join(match)}.*?$", msg.content.lower()) is not None:
+        return True
     return False
 
 

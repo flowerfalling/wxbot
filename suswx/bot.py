@@ -10,7 +10,7 @@ from typing import Callable, Optional, Sequence
 from wcferry import WxMsg
 
 from suswx import Content, Registry, ProcessMsgFunc
-from suswx.common import wcf, logger, Admin, botadmin
+from suswx.common import wcf, logger, Admin, bot_admin
 from suswx.Registry import func_startup_mode
 import asyncio
 
@@ -70,7 +70,7 @@ class Robot(object):
     """
 
     def __init__(self) -> None:
-        self._admin: Admin = botadmin
+        self._admin: Admin = bot_admin
         self.interval: float = 0.5
         self.mt_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=50)
 
@@ -98,7 +98,7 @@ class Robot(object):
         """
         if not msg.from_group() and msg.is_text():
             logger.info("[%s]: %s", wcf.get_info_by_wxid(msg.sender)["name"], msg.content)
-        if msg.sender == botadmin.wxid and msg.content == "/quit":
+        if msg.sender == bot_admin.wxid and msg.content == "/quit":
             exit(0)
         for f in registry.mt:
             if f.check(msg, self._admin.wxid):

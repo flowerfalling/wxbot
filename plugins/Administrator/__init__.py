@@ -6,7 +6,7 @@
 from schema import Schema
 
 from Configuration import config
-from suswx.common import wcf, logger, botadmin
+from suswx.common import wcf, logger, bot_admin
 
 __all__ = ["Administrator"]
 
@@ -34,12 +34,12 @@ else:
                 init_admin_config()
             case 1:
                 config["administrator"]["name"] = admin[0]["name"]
-                botadmin.wxid = config["administrator"]["wxid"] = admin[0]["wxid"]
+                bot_admin.wxid = config["administrator"]["wxid"] = admin[0]["wxid"]
             case _:
                 logger.warning(f"You have more than one friend named {admin_name}")
                 init_admin_config()
 
 config.save_config()
 admin = config["administrator"]
-botadmin.wxid = admin["wxid"]
+bot_admin.wxid = admin["wxid"]
 logger.info(f"Loaded admin, name: {admin['name']}, wxid: {admin['wxid']}")

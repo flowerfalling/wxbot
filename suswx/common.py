@@ -8,11 +8,12 @@ import logging
 
 from wcferry import Wcf
 
-__all__ = ["wcf", "logger", "admin_wxid", "botadmin", "Admin"]
+__all__ = ["wcf", "logger", "admin_wxid", "bot_admin", "Admin"]
 
 wcf: Wcf = Wcf()
 logger: logging.Logger = logging.getLogger()
 admin_wxid: list[str] = [wcf.get_self_wxid()]
+
 atexit.register(wcf.cleanup)
 atexit.register(lambda: print("Quit done"))
 
@@ -28,4 +29,4 @@ class Admin(object):
         self.wxid = wcf.get_self_wxid()
 
 
-botadmin: Admin = Admin()
+bot_admin: Admin = Admin()
