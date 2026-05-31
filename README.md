@@ -4,9 +4,9 @@
 English | <a href="README_zh.md">简体中文</a>
 </p>
 
-Papersus Wxbot is a WeChat bot with ChatGPT(only Windows)
+Papersus Wxbot is a Windows-only WeChat bot with ChatGPT support.
 
-WeChat robot framework and examples based on [wcferry](https://github.com/lich0821/WeChatFerry)
+Built on [wcferry](https://github.com/lich0821/WeChatFerry), this repo provides a WeChat bot framework and examples.
 
 <details><summary>Disclaimer[mandatory reading]</summary>
 
@@ -22,21 +22,23 @@ By downloading, installing, running or using the Tool, users of the Tool acknowl
 
 ## Basic Usage
 
-Now the bot only supports private chats, and does not support group chats for the time being
+- Private chats only; group chats are not supported yet.
 
 ### Environment
 
+- Windows
 - Python `>=3.10`
 - WeChat `3.9.2.23`
 
-### deploy
+### Install
 
 ```Shell
 git clone https://github.com/flowerfalling/wxbot.git
+cd wxbot
 ```
 
-_Download WeChat version 3.9.3.23 
-[Here](https://github.com/lich0821/WeChatFerry/releases/download/v39.0.12/WeChatSetup-3.9.2.23.exe)_
+_Download WeChat version 3.9.2.23
+[here](https://github.com/lich0821/WeChatFerry/releases/download/v39.0.12/WeChatSetup-3.9.2.23.exe)._
 
 ### Dependencies
 
@@ -48,7 +50,7 @@ python -m pip install -U pip
 pip install -r requirements.txt
 ```
 
-### Get Start
+### Getting Started
 
 ```Shell
 python SusRobot.py
@@ -56,15 +58,14 @@ python SusRobot.py
 # To stop, press Ctrl+C
 ```
 
-_Please use the administrator to set users who allow the bot function to reply, see details below (/enable)_
+_Use the administrator account to enable permissions for users (see /enable below)._
 
-The administrator(the default is wechat for bot login) sends `/enable username all` in the WeChat private message to enable all functions for the specified user.
+- The administrator (default: the WeChat account used to log in) sends `/enable username all` in a private chat to enable all functions for the specified user.
+- Users send `@menu` to view available commands.
 
-The user sends `@menu` to get the function list and use the function
+<details><summary>Features</summary>
 
-<details><summary>Feature</summary>
-
-#### Users' command(your friends)
+#### User commands (friends)
 
 ```Text
 @菜单  # get the menu
@@ -75,7 +76,7 @@ The user sends `@menu` to get the function list and use the function
 ```
 
 ```Text
-gpt command:
+GPT commands:
 /xxx  # Talk to GPT
 /gpt help  # Get help
 /gpt start  # Enable GPT continuous conversation
@@ -84,7 +85,7 @@ gpt command:
 ```
 
 ```Text
-gemini command:
+Gemini commands:
 %xxx  # Talk to Gemini
 %gemini help  # Get help
 %gemini start  # Enable Gemini continuous conversation
@@ -92,7 +93,7 @@ gemini command:
 %gemini clear  # Clear current session records
 ```
 
-#### Administrator's command(you)
+#### Administrator commands (you)
 
 The following functions are currently available:
 
@@ -100,11 +101,14 @@ The following functions are currently available:
 - gpt
 - gemini
 - hitokoto
+- history
+- hot_search
+- constellation
 
-Call any of them func
+Use any of the names above as the `func` parameter.
 
 ```Text
-Administrator documentation
+Administrator commands
   /help  # Get help
   /state  # View functions' status
   /config  # Reload configuration file
@@ -114,12 +118,12 @@ Administrator documentation
   /quit  # Exit robot
 ```
 
-_Gimini is not enabled by default, please fill in the token in plugins-info-gemini-token in config.yaml then restart (then enbale it)_
+_Gemini is disabled by default. Add your token to `plugins-info-gemini-token` in config.yaml, restart, then enable it._
 </details>
 
-## Do not abuse gpt
+## Do not abuse GPT
 
-I **picked up** this gpt API, so it could have serious consequences if misused
+The GPT API key used in the demo is shared, so misuse can cause service interruptions.
 
 ## Plugin development
 

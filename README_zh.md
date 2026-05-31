@@ -4,9 +4,9 @@
 简体中文 | <a href="README.md">English</a>
 </p>
 
-Papersus Wxbot 是一个带有 ChatGPT 的微信机器人（仅限 Windows）
+Papersus Wxbot 是一个仅支持 Windows 的 ChatGPT 微信机器人。
 
-是一个基于[wcferry](https://github.com/lich0821/WeChatFerry)的微信机器人框架及示例
+基于 [wcferry](https://github.com/lich0821/WeChatFerry) 的微信机器人框架及示例。
 
 <details><summary>免责声明【必读】</summary>
 
@@ -24,10 +24,11 @@ Papersus Wxbot 是一个带有 ChatGPT 的微信机器人（仅限 Windows）
 
 ## 基本用法
 
-目前机器人仅支持私聊，暂时不支持群聊
+- 仅支持私聊，暂不支持群聊。
 
 ### 环境
 
+- Windows
 - Python `>=3.10`
 - WeChat `3.9.2.23`
 
@@ -35,9 +36,10 @@ Papersus Wxbot 是一个带有 ChatGPT 的微信机器人（仅限 Windows）
 
 ```Shell
 git clone https://github.com/flowerfalling/wxbot.git
+cd wxbot
 ```
 
-_[在这里](https://github.com/lich0821/WeChatFerry/releases/download/v39.0.12/WeChatSetup-3.9.2.23.exe)下载微信版本3.9.3.23_
+_[在这里](https://github.com/lich0821/WeChatFerry/releases/download/v39.0.12/WeChatSetup-3.9.2.23.exe)下载微信版本 3.9.2.23。_
 
 ### 依赖
 
@@ -45,7 +47,7 @@ _[在这里](https://github.com/lich0821/WeChatFerry/releases/download/v39.0.12/
 # 更新 pip
 python -m pip install -U pip
 
-# 安装 依赖
+# 安装依赖
 pip install -r requirements.txt
 ```
 
@@ -57,13 +59,12 @@ python SusRobot.py
 # 要停止，请按 Ctrl+C
 ```
 
-_请使用管理员设置允许bot功能回复的用户,见下详情中/enable_
+_请使用管理员账号为用户设置权限（见下文 /enable）。_
 
-管理员(默认为bot登录的微信)在微信私信中发送`/enable username all`为指定用户启用所有功能
+- 管理员（默认为机器人登录的微信号）在私信中发送 `/enable username all` 为指定用户启用所有功能。
+- 用户发送 `@菜单` 获取功能列表。
 
-用户发送`@菜单`获取功能列表并使用功能
-
-<details><summary>详情</summary>
+<details><summary>功能列表</summary>
 
 #### 用户命令（你的朋友）
 
@@ -76,7 +77,7 @@ _请使用管理员设置允许bot功能回复的用户,见下详情中/enable_
 ```
 
 ```Text
-gpt command:
+GPT 命令:
 /xxx  # 与 GPT 交谈
 /gpt help  # 得到帮助
 /gpt start  # 启用 GPT 连续对话
@@ -85,7 +86,7 @@ gpt command:
 ```
 
 ```Text
-gemini command:
+Gemini 命令:
 %xxx  # 与 Gemini 交谈
 %gemini help  # 得到帮助
 %gemini start  # 启用 Gemini 持续对话
@@ -105,10 +106,10 @@ gemini command:
 - hot_search
 - constellation
 
-称其中任意一个为func
+以上名称可作为管理员命令中的 `func` 参数。
 
 ```Text
-Administrator documentation
+管理员命令
   /help  # 得到帮助
   /state  # 查看功能的状态
   /config  # 重新载入配置文件
@@ -118,8 +119,12 @@ Administrator documentation
   /quit  # 退出机器人
 ```
 
-_Gimini默认不启用，请填写config.yaml中plugins-info-gemini-token后重启（然后enbale）_
+_Gemini 默认不启用，请在 config.yaml 中填写 `plugins-info-gemini-token` 后重启并启用。_
 </details>
+
+## 请勿滥用 GPT
+
+示例中使用的 GPT API key 为共享资源，滥用可能导致服务中断。
 
 ## 插件开发
 
